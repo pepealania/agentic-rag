@@ -1,0 +1,12 @@
+experiment:
+  name: "baseline"
+
+pipeline:
+  max_iterations: 1
+
+retrieval:
+  top_k: 2
+
+paths:
+  data: "data/"
+  outputs: "outputs/"
