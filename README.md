@@ -1,322 +1,390 @@
-# agentic-rag
-# Proof of Concept: LangGraph vs. LlamaIndex Workflows
+# Agentic RAG
 
-## Descripción
+Reproducible research repository for the implementation and evaluation of an Agentic Retrieval-Augmented Generation (RAG) system.
 
-Este directorio contiene la **prueba de viabilidad (PoC)** realizada para comparar dos alternativas de orquestación de workflows para la arquitectura experimental propuesta:
+The repository is organized to support controlled experiments, reproducible execution, and comparison between a baseline RAG pipeline and an agentic RAG pipeline.
 
-* **LangGraph**
-* **LlamaIndex Workflows**
-
-El objetivo de la PoC es verificar la viabilidad técnica de ambas tecnologías mediante un workflow mínimo de dos nodos:
+## Repository structure
 
 ```text
-Consulta
-   ↓
-Recuperar evidencias
-   ↓
-Analizar
-   ↓
-Resultado
+agentic-rag/
+├── data/
+│   ├── raw/
+│   └── processed/
+├── src/
+│   └── agentic_rag/
+├── configs/
+│   └── default.yaml
+├── experiments/
+├── tests/
+├── outputs/
+├── docs/
+├── pyproject.toml
+├── README.md
+└── .gitignore
 ```
 
-Además de comprobar la ejecución básica, se evalúan aspectos relacionados con el **estado, trazabilidad, debugging e inspección del flujo de ejecución**, con especial atención a la capacidad de LangGraph para conservar y consultar snapshots del estado mediante checkpoints.
+## Requirements
 
----
+- Python 3.12
+- Git
 
-## Estructura
+Python 3.12 is the required Python version for this project.
+
+## Installation
+
+### Windows
+
+#### 1. Clone the repository
+
+```powershell
+git clone https://github.com/pepealania/agentic-rag.git
+cd agentic-rag
+```
+
+#### 2. Create a Python 3.12 virtual environment
+
+```powershell
+py -3.12 -m venv .venv
+```
+
+#### 3. Activate the virtual environment
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+After activation, the terminal should display:
 
 ```text
-PoC/
-├── langgraph_poc.ipynb
-├── llamaindex_workflows_poc.ipynb
-└── README.md
+(.venv)
 ```
 
-### `langgraph_poc.ipynb`
+#### 4. Upgrade pip
 
-Implementa el workflow utilizando **LangGraph**.
+```powershell
+python -m pip install --upgrade pip
+```
 
-El workflow contiene dos nodos:
+#### 5. Install the project
 
-1. `recuperar`
-2. `analizar`
+```powershell
+pip install -e .
+```
 
-El estado compartido contiene:
+The project and its dependencies are installed according to the versions declared in `pyproject.toml`.
+
+### Linux / macOS
+
+#### 1. Clone the repository
+
+```bash
+git clone https://github.com/pepealania/agentic-rag.git
+cd agentic-rag
+```
+
+#### 2. Create a Python 3.12 virtual environment
+
+```bash
+python3.12 -m venv .venv
+```
+
+#### 3. Activate the virtual environment
+
+```bash
+source .venv/bin/activate
+```
+
+#### 4. Upgrade pip
+
+```bash
+python -m pip install --upgrade pip
+```
+
+#### 5. Install the project
+
+```bash
+pip install -e .
+```
+
+## Configuration
+
+Experiment parameters are centralized in:
 
 ```text
-consulta
-evidencias
-resultado
+configs/default.yaml
 ```
 
-La PoC incorpora un `InMemorySaver` como checkpointer para conservar snapshots de la ejecución.
+The configuration defines the parameters required to reproduce an experiment, including:
 
-El historial puede recuperarse mediante:
+- experiment name;
+- random seed;
+- LLM provider and model;
+- embedding provider and model;
+- generation temperature;
+- maximum number of generated tokens;
+- retrieval `top_k`;
+- pipeline iteration limit;
+- evaluation dataset path;
+- data paths;
+- experiment output paths.
 
-```python
-history = list(
-    graph.get_state_history(config)
-)
+Example:
+
+```yaml
+experiment:
+  name: "baseline"
+  seed: 42
+
+model:
+  provider: "openai"
+  name: "REPLACE_WITH_MODEL"
+  temperature: 0.0
+  max_tokens: 1024
+
+embeddings:
+  provider: "openai"
+  name: "REPLACE_WITH_EMBEDDING_MODEL"
+
+retrieval:
+  top_k: 5
+
+pipeline:
+  max_iterations: 1
+
+evaluation:
+  questions_path: "data/evaluation/questions.jsonl"
+
+paths:
+  data: "data"
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  outputs: "outputs"
+  experiments: "experiments"
+  logs: "outputs/logs"
 ```
 
-Esto permite inspeccionar la evolución del estado durante la ejecución.
+Parameters should be modified through the configuration file rather than being duplicated throughout the source code.
 
----
+## Running an experiment
 
-### `llamaindex_workflows_poc.ipynb`
-
-Implementa el mismo concepto utilizando **LlamaIndex Workflows**.
-
-El workflow contiene dos steps:
-
-1. `recuperar`
-2. `analizar`
-
-Los pasos se comunican mediante eventos:
+The executable implementation is located under:
 
 ```text
-StartEvent
-    ↓
-EvidenciasEvent
-    ↓
-StopEvent
+src/agentic_rag/
 ```
 
-El workflow utiliza `Context` y `ctx.store` para conservar información de la ejecución y registrar el estado e historial de forma explícita.
+From the repository root, with the virtual environment activated, run:
 
----
+```powershell
+python -m agentic_rag.run_experiment
+```
 
-## Requerimientos
+A successful execution produces an experiment identifier and a dedicated output directory.
 
-Ambos notebooks están diseñados para ejecutarse en **Google Colab**.
-
-### LangGraph
-
-Versión utilizada:
+Example:
 
 ```text
-LangGraph 1.2.9
-Python >= 3.10
+Experiment created successfully.
+Output directory: outputs\20260821_205426_baseline
 ```
 
-Instalación:
-
-```python
-!pip install -q "langgraph==1.2.9"
-```
-
-### LlamaIndex Workflows
-
-Versión utilizada:
+The generated directory contains:
 
 ```text
-LlamaIndex Core 0.14.23
-Python >= 3.10
+outputs/
+└── 20260821_205426_baseline/
+    ├── config.yaml
+    └── environment.json
 ```
 
-Instalación:
+### Experiment identifier
 
-```python
-!pip install -q "llama-index-core==0.14.23"
-```
+Each execution receives a unique identifier based on the execution timestamp and experiment name.
 
----
-
-## Ejecución
-
-### 1. Abrir los notebooks
-
-Los archivos `.ipynb` pueden abrirse directamente en Google Colab.
-
-### 2. Ejecutar la celda de instalación
-
-Cada notebook contiene una celda inicial para instalar la versión correspondiente del framework.
-
-### 3. Ejecutar el workflow
-
-Ambos notebooks implementan el mismo flujo conceptual:
+Example:
 
 ```text
-                 ┌──────────────┐
-                 │   Consulta   │
-                 └──────┬───────┘
-                        ↓
-                ┌───────────────┐
-                │   Recuperar   │
-                └───────┬───────┘
-                        ↓
-                ┌───────────────┐
-                │    Analizar   │
-                └───────┬───────┘
-                        ↓
-                ┌───────────────┐
-                │    Resultado  │
-                └───────────────┘
+20260821_205426_baseline
 ```
 
-No se utiliza un LLM real ni un sistema de recuperación documental en esta primera PoC. Las evidencias son simuladas para evaluar exclusivamente las capacidades de orquestación de cada framework.
+The identifier is used to associate the artifacts produced by that execution.
 
----
+### Saved configuration
 
-## Aspectos evaluados
+The `config.yaml` file inside the experiment directory contains the configuration used for that specific execution.
 
-La prueba de viabilidad considera los siguientes aspectos:
+This allows an experiment to be traced back to the parameters that produced its results.
 
-| Criterio                        | LangGraph                         | LlamaIndex Workflows       |
-| ------------------------------- | --------------------------------- | -------------------------- |
-| Instalación                     | ✓                                 | ✓                          |
-| Ejecución de workflow           | ✓                                 | ✓                          |
-| Flujo de dos nodos              | ✓                                 | ✓                          |
-| Gestión de estado               | ✓                                 | ✓                          |
-| Comunicación entre pasos        | Estado compartido                 | Eventos                    |
-| Debugging básico                | ✓                                 | ✓                          |
-| Inspección histórica del estado | **Snapshots / checkpoints**       | Context / store            |
-| Trazabilidad                    | **Estado + nodos + transiciones** | Steps + eventos + contexto |
-| Control explícito del flujo     | **✓**                             | ✓                          |
-| RAG                             | ✓                                 | **✓**                      |
+### Execution environment
 
----
+The `environment.json` file records information about the Python interpreter and operating system used during execution.
 
-## Debugging y trazabilidad
+This provides additional information for reproducing the experiment environment.
 
-Uno de los objetivos principales de la PoC es evaluar la capacidad de inspeccionar el comportamiento interno del workflow.
+## Reproducibility workflow
 
-### LangGraph
-
-LangGraph utiliza un estado explícito y un mecanismo de checkpoints. Esto permite consultar el estado actual y recuperar el historial de snapshots de una ejecución.
-
-Ejemplo:
-
-```python
-history = list(
-    graph.get_state_history(config)
-)
-```
-
-Los snapshots permiten observar cómo evoluciona el estado entre las diferentes etapas del workflow.
-
-Conceptualmente:
+The complete workflow is:
 
 ```text
-Snapshot 0
-    ↓
-consulta
-evidencias = []
-resultado = ""
-
-    ↓
-
-Snapshot 1
-    ↓
-consulta
-evidencias = [A, B]
-resultado = ""
-
-    ↓
-
-Snapshot 2
-    ↓
-consulta
-evidencias = [A, B]
-resultado = "..."
+Clone repository
+       |
+       v
+Create Python 3.12 virtual environment
+       |
+       v
+Activate virtual environment
+       |
+       v
+pip install -e .
+       |
+       v
+Configure configs/default.yaml
+       |
+       v
+python -m agentic_rag.run_experiment
+       |
+       v
+outputs/<experiment_id>/
+       |
+       +── config.yaml
+       |
+       └── environment.json
 ```
 
-Esta capacidad resulta especialmente relevante para la arquitectura experimental porque posteriormente será necesario analizar reintentos, decisiones condicionales, estados intermedios y resultados generados por agentes.
+The executable project logic is implemented in `src/`.
 
-### LlamaIndex Workflows
+Notebook execution is not required to run the project.
 
-LlamaIndex permite conservar información utilizando `Context` y `ctx.store`, además de utilizar eventos para comunicar información entre los diferentes steps.
+Notebooks under `experiments/` may be used for exploratory analysis or documentation, but they are not the only implementation of the system.
 
-En la PoC se registra explícitamente información como:
+## Dependency management
+
+Project dependencies are declared in:
 
 ```text
-consulta
-evidencias
-resultado
-historial
+pyproject.toml
 ```
 
-Esto permite instrumentar y analizar la ejecución, aunque el historial debe ser gestionado explícitamente mediante el contexto.
+Dependency versions are explicitly specified to provide a consistent execution environment.
 
----
-
-## Resultado de la PoC
-
-Ambas tecnologías demostraron ser **viables** para implementar el workflow básico de dos nodos.
-
-Sin embargo, se identificó una diferencia importante para los objetivos de esta investigación:
-
-> **LangGraph proporciona una representación más explícita del workflow y mecanismos de persistencia mediante checkpoints que permiten inspeccionar el historial de estados de una ejecución.**
-
-Esta característica facilita el debugging, la trazabilidad y el análisis reproducible del comportamiento del agente.
-
-LlamaIndex Workflows presenta una abstracción adecuada para workflows basados en eventos y ofrece ventajas importantes para aplicaciones centradas en RAG y recuperación documental. No obstante, para la arquitectura propuesta, el control explícito del flujo y la capacidad de inspeccionar estados históricos tienen mayor relevancia.
-
----
-
-## Decisión tecnológica
-
-A partir de la prueba de viabilidad y de la matriz de decisión ponderada, **LangGraph fue seleccionado como framework de orquestación para la implementación experimental**.
-
-La decisión se fundamenta principalmente en:
-
-1. Control explícito del flujo.
-2. Gestión de estado compartido.
-3. Soporte para rutas condicionales y ciclos.
-4. Capacidad de persistir checkpoints.
-5. Inspección del historial de estados.
-6. Facilidades para debugging y trazabilidad.
-7. Adecuación para experimentar con diferentes estrategias de ejecución.
-8. Compatibilidad con la arquitectura de LLM directo, RAG y Agentic RAG.
-
-LlamaIndex Workflows permanece como una alternativa relevante, especialmente para componentes relacionados con recuperación documental y RAG.
-
----
-
-## Próximos pasos
-
-La PoC de dos nodos constituye únicamente la primera etapa de validación.
-
-La siguiente prueba debería incorporar las características que representan los requisitos reales de la arquitectura:
+The project targets:
 
 ```text
-                    Consulta
-                       ↓
-                 Recuperación
-                       ↓
-                    Analista
-                       ↓
-                ¿JSON válido?
-                 /          \
-               NO            SÍ
-               ↓              ↓
-           Reintento         FIN
-               ↓
-        ¿Límite alcanzado?
-           /          \
-         NO            SÍ
-         ↓              ↓
-     Analista         ERROR
+Python 3.12
 ```
 
-Esta segunda etapa permitirá evaluar de manera más significativa:
+Install the project and its dependencies with:
 
-* rutas condicionales;
-* reintentos;
-* límites de iteración;
-* validación de salidas estructuradas;
-* persistencia del estado;
-* trazabilidad de evidencias;
-* debugging de estados intermedios;
-* comportamiento de Agentic RAG.
+```powershell
+pip install -e .
+```
 
-El objetivo final es utilizar el framework seleccionado como capa de orquestación común para comparar experimentalmente:
+Individual dependencies should not need to be installed manually.
+
+## Secrets and temporary files
+
+Secrets must never be committed to the repository.
+
+The `.gitignore` file excludes local and generated files including:
+
+- `.env` files;
+- virtual environments;
+- Python caches;
+- test caches;
+- Jupyter checkpoints;
+- generated experiment outputs;
+- local raw data;
+- local processed data;
+- build artifacts;
+- IDE files;
+- operating-system temporary files.
+
+Generated experiment outputs are stored under:
 
 ```text
-LLM directo
-     vs.
-RAG
-     vs.
-Agentic RAG
+outputs/
 ```
+
+and are excluded from version control.
+
+Local datasets are stored under:
+
+```text
+data/raw/
+data/processed/
+```
+
+and are excluded from version control.
+
+## Development
+
+Source code:
+
+```text
+src/agentic_rag/
+```
+
+Tests:
+
+```text
+tests/
+```
+
+Configuration:
+
+```text
+configs/
+```
+
+Experiments:
+
+```text
+experiments/
+```
+
+Documentation:
+
+```text
+docs/
+```
+
+The executable implementation should remain independent of notebook execution.
+
+## Research workflow
+
+The project is developed in the following stages:
+
+1. Reproducible repository setup.
+2. Baseline RAG implementation.
+3. Agentic RAG implementation.
+4. Experimental evaluation.
+5. Comparison and analysis.
+
+The baseline RAG is implemented independently from the agentic workflow so that the contribution of the agentic components can be evaluated against a controlled reference.
+
+## Current status
+
+The repository currently provides:
+
+- reproducible project structure;
+- centralized experiment configuration;
+- versioned dependencies;
+- reproducible experiment execution;
+- unique experiment identifiers;
+- saved experiment configurations;
+- execution environment information.
+
+The next implementation stage is the baseline RAG pipeline, including:
+
+- document ingestion;
+- persistent document metadata;
+- document chunking;
+- embeddings;
+- vector indexing;
+- top-k retrieval;
+- context-constrained generation;
+- document and chunk citations;
+- retrieval scores;
+- execution traces;
+- evaluation questions and metrics.

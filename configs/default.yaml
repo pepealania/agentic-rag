@@ -1,12 +1,30 @@
 experiment:
   name: "baseline"
+  seed: 42
+
+model:
+  provider: "openai"
+  name: "REPLACE_WITH_MODEL"
+  temperature: 0.0
+  max_tokens: 1024
+
+embeddings:
+  provider: "openai"
+  name: "REPLACE_WITH_EMBEDDING_MODEL"
+
+retrieval:
+  top_k: 5
 
 pipeline:
   max_iterations: 1
 
-retrieval:
-  top_k: 2
+evaluation:
+  questions_path: "data/evaluation/questions.jsonl"
 
 paths:
-  data: "data/"
-  outputs: "outputs/"
+  data: "data"
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  outputs: "outputs"
+  experiments: "experiments"
+  logs: "outputs/logs"
