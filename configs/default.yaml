@@ -1,25 +1,34 @@
 experiment:
-  name: "baseline"
+  name: "rag_baseline"
   seed: 42
 
 model:
-  provider: "openai"
-  name: "REPLACE_WITH_MODEL"
+  provider: "openai_compatible"
+  name: "llama3.1:8b"
+  base_url: "http://localhost:11434/v1"
   temperature: 0.0
   max_tokens: 1024
 
 embeddings:
-  provider: "openai"
-  name: "REPLACE_WITH_EMBEDDING_MODEL"
+  provider: "sentence-transformers"
+  name: "sentence-transformers/all-MiniLM-L6-v2"
 
 retrieval:
   top_k: 5
+  chunk_size: 500
+  chunk_overlap: 50
 
 pipeline:
   max_iterations: 1
 
+generation:
+  require_context: true
+  require_citations: true
+  json_output: true
+
 evaluation:
   questions_path: "data/evaluation/questions.jsonl"
+  min_questions: 10
 
 paths:
   data: "data"
