@@ -120,3 +120,264 @@ class RAGBaseline:
 
         return self.chunks
     
+    def build_index(self):
+
+        texts = [
+            chunk["content"]
+            for chunk in self.chunks
+        ]
+
+        embeddings = self.embedding_model.encode(
+            texts,
+            convert_to_numpy=True,
+            normalize_embeddings=True
+        )
+
+        embeddings = embeddings.astype(
+            "float32"
+        )
+
+        dimension = embeddings.shape[1]
+
+        self.index = faiss.IndexFlatIP(
+            dimension
+        )
+
+        self.index.add(embeddings)
+
+        return self.index    
+
+    def retrieve(self, query):
+
+        query_embedding = self.embedding_model.encode(
+            [query],
+            convert_to_numpy=True,
+            normalize_embeddings=True
+        )
+
+        query_embedding = query_embedding.astype(
+            "float32"
+        )
+
+        scores, indices = self.index.search(
+            query_embedding,
+            self.top_k
+        )
+
+        results = []
+
+        for score, idx in zip(
+            scores[0],
+            indices[0]
+        ):
+
+            if idx < 0:
+                continue
+
+            chunk = self.chunks[idx].copy()
+
+            chunk["score"] = float(score)
+
+            results.append(chunk)
+
+        return results
+    
+    def build_prompt(self, question, retrieved):
+
+        context = []
+
+        for item in retrieved:
+
+            context.append(
+                f"""
+DOCUMENT_ID: {item['document_id']}
+CHUNK_ID: {item['chunk_id']}
+SCORE: {item['score']}
+
+CONTENT:
+{item['content']}
+"""
+            )
+
+        context_text = "\n".join(context)
+
+        return f"""
+Eres un sistema de análisis documental.
+
+Responde la pregunta utilizando EXCLUSIVAMENTE
+la evidencia proporcionada.
+
+No utilices conocimiento externo.
+
+Si la evidencia no permite responder,
+debes indicarlo explícitamente.
+
+Cada afirmación factual debe estar respaldada
+por una cita.
+
+Pregunta:
+{question}
+
+Evidencia:
+{context_text}
+
+Devuelve exclusivamente un JSON válido:
+
+{{
+  "answer": "respuesta en español",
+  "citations": [
+    {{
+      "document_id": "DOC-XXX",
+      "chunk_id": "chunk_X"
+    }}
+  ],
+  "abstained": false
+}}
+"""
+
+    def generate(self, question, retrieved):
+
+        prompt = self.build_prompt(
+            question,
+            retrieved
+        )
+
+        start = time.time()
+
+        response = self.client.chat.completions.create(
+            model=self.model_name,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        latency = time.time() - start
+
+        raw = response.choices[0].message.content
+
+        return raw, latency
+
+    def parse_response(self, raw):
+
+        raw = raw.strip()
+
+        if raw.startswith("```"):
+            raw = raw.replace("```json", "")
+            raw = raw.replace("```", "")
+            raw = raw.strip()
+
+        return json.loads(raw)
+
+    def validate_citations(
+        self,
+        response,
+        retrieved
+    ):
+
+        valid_pairs = {
+            (
+                item["document_id"],
+                item["chunk_id"]
+            )
+            for item in retrieved
+        }
+
+        citations = response.get(
+            "citations",
+            []
+        )
+
+        if not citations:
+            return 0.0
+
+        valid = 0
+
+        for citation in citations:
+
+            pair = (
+                citation.get("document_id"),
+                citation.get("chunk_id")
+            )
+
+            if pair in valid_pairs:
+                valid += 1
+
+        return valid / len(citations)
+
+    def run(self, question_id, question):
+
+        start = time.time()
+
+        retrieved = self.retrieve(
+            question
+        )
+
+        raw_response, generation_latency = (
+            self.generate(
+                question,
+                retrieved
+            )
+        )
+
+        try:
+
+            parsed = self.parse_response(
+                raw_response
+            )
+
+            json_valid = True
+
+            citation_validity = (
+                self.validate_citations(
+                    parsed,
+                    retrieved
+                )
+            )
+
+            answer = parsed.get(
+                "answer",
+                ""
+            )
+
+            abstained = parsed.get(
+                "abstained",
+                False
+            )
+
+            error = None
+
+        except Exception as e:
+
+            parsed = {}
+
+            json_valid = False
+            citation_validity = 0.0
+            answer = raw_response
+            abstained = None
+            error = str(e)
+
+        total_latency = time.time() - start
+
+        return {
+            "question_id": question_id,
+            "answer": answer,
+            "abstained": abstained,
+            "json_valid": json_valid,
+            "citation_validity": citation_validity,
+            "latency_seconds": total_latency,
+            "generation_latency_seconds": generation_latency,
+            "retrieved_documents": [
+                {
+                    "document_id": x["document_id"],
+                    "chunk_id": x["chunk_id"],
+                    "score": x["score"]
+                }
+                for x in retrieved
+            ],
+            "error": error
+        }
