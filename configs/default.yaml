@@ -17,6 +17,8 @@ retrieval:
   top_k: 5
   chunk_size: 500
   chunk_overlap: 50
+  index_path: "data/processed/index.faiss"
+  chunks_path: "data/processed/chunks.jsonl"  
 
 pipeline:
   max_iterations: 1

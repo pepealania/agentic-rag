@@ -28,6 +28,7 @@ def validate_config(config: dict) -> None:
         "embeddings",
         "retrieval",
         "pipeline",
+        "generation",        
         "evaluation",
         "paths",
     ]

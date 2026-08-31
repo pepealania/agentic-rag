@@ -17,6 +17,7 @@ dependencies = [
     "faiss-cpu==1.11.0",
     "sentence-transformers==5.1.0",
     "requests==2.32.4",
+    "openai==1.109.1",    
 ]
 
 [tool.setuptools.packages.find]
