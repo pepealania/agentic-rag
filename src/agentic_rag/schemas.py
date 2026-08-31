@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
@@ -50,8 +50,18 @@ class Citation(BaseModel):
 
 
 class Answer(BaseModel):
-    """A generated RAG answer."""
+    """Structured answer shared by baseline and Agentic RAG."""
 
     question_id: str
     answer: str
+
+    facts: list[str] = Field(default_factory=list)
+    indicators: list[str] = Field(default_factory=list)
+    uncertainty: list[str] = Field(default_factory=list)
+
     citations: list[Citation] = Field(default_factory=list)
+
+    human_review: bool = False
+
+    # Baseline-compatible field.
+    abstained: bool = False

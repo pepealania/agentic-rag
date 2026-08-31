@@ -1,4 +1,4 @@
-experiment:
+﻿experiment:
   name: "rag_baseline"
   seed: 42
 
@@ -21,7 +21,7 @@ retrieval:
   chunks_path: "data/processed/chunks.jsonl"  
 
 pipeline:
-  max_iterations: 1
+  max_iterations: 8
 
 generation:
   require_context: true
