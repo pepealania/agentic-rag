@@ -53,6 +53,11 @@ data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
+# Sprint 1 synthetic corpus
+!data/raw/corpus_sprint1.jsonl
+!data/processed/corpus_sprint1.jsonl
+
+
 # =========================
 # Build / packaging
 # =========================
