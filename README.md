@@ -357,7 +357,7 @@ The project is developed in the following stages:
 
 1. Reproducible repository setup.
 2. Baseline RAG implementation.
-3. Agentic RAG implementation.
+3. Minimum Agentic RAG implementation.
 4. Experimental evaluation.
 5. Comparison and analysis.
 
@@ -365,26 +365,39 @@ The baseline RAG is implemented independently from the agentic workflow so that 
 
 ## Current status
 
-The repository currently provides:
+### 3.1 Reproducible repository setup — ✅ Complete
 
-- reproducible project structure;
+The repository provides:
+
+- reproducible Python 3.12 environment;
 - centralized experiment configuration;
-- versioned dependencies;
-- reproducible experiment execution;
+- versioned project dependencies;
+- controlled random seed and generation temperature;
 - unique experiment identifiers;
 - saved experiment configurations;
-- execution environment information.
+- execution environment information;
+- separation between source code, experiments, tests, data, and generated outputs.
 
-The next implementation stage is the baseline RAG pipeline, including:
+### 3.2 Baseline RAG — 🟢 Implemented
+
+The baseline RAG pipeline is implemented and provides the reference system for the Agentic RAG experiments.
+
+The current implementation includes:
 
 - document ingestion;
-- persistent document metadata;
-- document chunking;
-- embeddings;
+- document and chunk metadata;
+- configurable chunking;
+- configurable embeddings;
 - vector indexing;
 - top-k retrieval;
-- context-constrained generation;
+- context-constrained answer generation;
 - document and chunk citations;
 - retrieval scores;
-- execution traces;
-- evaluation questions and metrics.
+- structured outputs;
+- evidence/citation validation;
+- baseline experiment execution.
+
+The main baseline implementation is located in:
+
+```text
+src/rag_baseline.py
