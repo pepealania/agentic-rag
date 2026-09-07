@@ -1,11 +1,12 @@
 ﻿from __future__ import annotations
 
 import json
+import os
 from typing import Any
 
 from openai import OpenAI
 
-from agentic_rag.schemas import Answer, Citation
+from agentic_rag.schemas import Answer
 from agentic_rag.state import AgentState
 
 
@@ -14,8 +15,8 @@ class AnalystAgent:
 
     def __init__(
         self,
-        model_name: str = "llama3.1:8b",
-        base_url: str = "http://localhost:11434/v1",
+        model_name: str = "gpt-4o-mini",
+        base_url: str | None = None,
         temperature: float = 0.0,
         max_tokens: int = 1024,
         client: Any | None = None,
@@ -24,10 +25,25 @@ class AnalystAgent:
         self.temperature = temperature
         self.max_tokens = max_tokens
 
-        self.client = client or OpenAI(
-            base_url=base_url,
-            api_key="ollama",
-        )
+        if client is not None:
+            self.client = client
+        else:
+            resolved_base_url = base_url or os.environ.get(
+                "OPENAI_BASE_URL",
+                "https://api.openai.com/v1",
+            )
+
+            api_key = os.environ.get("OPENAI_API_KEY")
+
+            if not api_key:
+                raise RuntimeError(
+                    "OPENAI_API_KEY is not configured."
+                )
+
+            self.client = OpenAI(
+                api_key=api_key,
+                base_url=resolved_base_url,
+            )
 
     def _build_prompt(
         self,
@@ -114,9 +130,17 @@ Devuelve exclusivamente JSON válido con esta estructura:
 
     def run(self, state: AgentState) -> AgentState:
         question = state["question"]
-        retrieved_chunks = state.get("retrieved_chunks", [])
+        retrieved_chunks = state.get(
+            "retrieved_chunks",
+            [],
+        )
 
-        decision_log = list(state.get("decision_log", []))
+        decision_log = list(
+            state.get(
+                "decision_log",
+                [],
+            )
+        )
 
         if not retrieved_chunks:
             answer = Answer(
@@ -169,7 +193,9 @@ Devuelve exclusivamente JSON válido con esta estructura:
         raw_response = response.choices[0].message.content
 
         if not raw_response:
-            raise ValueError("Analyst LLM returned an empty response.")
+            raise ValueError(
+                "Analyst LLM returned an empty response."
+            )
 
         answer = self._parse_response(
             raw_response,
