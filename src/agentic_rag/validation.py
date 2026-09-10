@@ -26,28 +26,32 @@ def validate_answer(
     if not answer.citations:
         errors.append("citations_missing")
 
+    # chunk_id is only unique within a document in this corpus.
+    # Use (document_id, chunk_id) as the deterministic evidence key.
     retrieved_by_id = {
-        chunk.chunk_id: chunk
+        (chunk.document_id, chunk.chunk_id): chunk
         for chunk in retrieved_chunks
     }
 
     for citation in answer.citations:
-        if citation.chunk_id not in retrieved_by_id:
+        citation_key = (
+            citation.document_id,
+            citation.chunk_id,
+        )
+
+        if citation_key not in retrieved_by_id:
             errors.append(
-                f"citation_not_in_evidence: {citation.chunk_id}"
+                "citation_not_in_evidence: "
+                f"{citation.document_id}/{citation.chunk_id}"
             )
             continue
 
-        chunk = retrieved_by_id[citation.chunk_id]
-
-        if citation.document_id != chunk.document_id:
-            errors.append(
-                f"citation_document_mismatch: {citation.chunk_id}"
-            )
+        chunk = retrieved_by_id[citation_key]
 
         if citation.source != chunk.source:
             errors.append(
-                f"citation_source_mismatch: {citation.chunk_id}"
+                f"citation_source_mismatch: "
+                f"{citation.document_id}/{citation.chunk_id}"
             )
 
     if retrieved_chunks and answer.answer:
@@ -68,7 +72,9 @@ def validate_answer(
             )
 
             if matching_terms == 0:
-                errors.append("answer_has_no_basic_evidence_overlap")
+                errors.append(
+                    "answer_has_no_basic_evidence_overlap"
+                )
 
     return errors
 
