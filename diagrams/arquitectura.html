@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG vs Agentic RAG</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f5f7fb;
+        color: #172033;
+    }
+
+    .container {
+        width: 1500px;
+        margin: 0 auto;
+        padding: 35px;
+    }
+
+    h1 {
+        text-align: center;
+        margin: 0 0 35px;
+        font-size: 34px;
+    }
+
+    .comparison {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    .architecture {
+        background: white;
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 8px 25px rgba(0,0,0,.08);
+        min-height: 700px;
+    }
+
+    .title {
+        text-align: center;
+        font-size: 26px;
+        font-weight: bold;
+        margin-bottom: 25px;
+    }
+
+    .rag .title {
+        color: #2563eb;
+    }
+
+    .agentic .title {
+        color: #7c3aed;
+    }
+
+    .flow {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .node {
+        width: 85%;
+        padding: 17px;
+        border-radius: 12px;
+        text-align: center;
+        font-weight: bold;
+        border: 2px solid;
+    }
+
+    .node small {
+        display: block;
+        margin-top: 6px;
+        font-weight: normal;
+        font-size: 14px;
+    }
+
+    .input {
+        background: #eef2ff;
+        border-color: #6366f1;
+    }
+
+    .retrieval {
+        background: #eff6ff;
+        border-color: #3b82f6;
+    }
+
+    .generation {
+        background: #ecfdf5;
+        border-color: #10b981;
+    }
+
+    .coordinator {
+        background: #f5f3ff;
+        border-color: #8b5cf6;
+    }
+
+    .evidence {
+        background: #ede9fe;
+        border-color: #7c3aed;
+    }
+
+    .analyst {
+        background: #ecfdf5;
+        border-color: #10b981;
+    }
+
+    .validator {
+        background: #fff7ed;
+        border-color: #f97316;
+    }
+
+    .output {
+        background: #f0fdf4;
+        border-color: #16a34a;
+    }
+
+    .arrow {
+        font-size: 25px;
+        color: #64748b;
+    }
+
+    .decision {
+        width: 90%;
+        padding: 14px;
+        background: #faf5ff;
+        border: 2px dashed #8b5cf6;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .loop {
+        width: 90%;
+        padding: 12px;
+        border-radius: 10px;
+        background: #fef2f2;
+        border: 2px solid #ef4444;
+        color: #991b1b;
+        text-align: center;
+        font-size: 13px;
+    }
+
+    .features {
+        margin-top: 25px;
+        padding: 18px;
+        border-radius: 12px;
+        background: #f8fafc;
+    }
+
+    .features h3 {
+        margin-top: 0;
+        font-size: 18px;
+    }
+
+    .features ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+        line-height: 1.7;
+    }
+
+    .legend {
+        margin-top: 30px;
+        background: white;
+        padding: 18px;
+        border-radius: 14px;
+        text-align: center;
+        box-shadow: 0 5px 18px rgba(0,0,0,.06);
+    }
+
+    .legend span {
+        margin: 0 15px;
+        font-size: 14px;
+    }
+
+    .dot {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+
+    .blue { background: #3b82f6; }
+    .purple { background: #7c3aed; }
+    .orange { background: #f97316; }
+    .green { background: #10b981; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Arquitectura RAG Convencional vs. Agentic RAG</h1>
+
+    <div class="comparison">
+
+        <!-- ================= RAG ================= -->
+
+        <section class="architecture rag">
+
+            <div class="title">
+                RAG Convencional
+            </div>
+
+            <div class="flow">
+
+                <div class="node input">
+                    Consulta
+                    <small>Pregunta del usuario</small>
+                </div>
+
+                <div class="arrow">↓</div>
+
+                <div class="node retrieval">
+                    Recuperador
+                    <small>Embeddings + Vector DB + Top-k</small>
+                </div>
+
+                <div class="arrow">↓</div>
+
+                <div class="decision">
+                    Recuperación única
+                    <br>
+                    <strong>Documentos / Chunks relevantes</strong>
+                </div>
+
+                <div class="arrow">↓</div>
+
+                <div class="node generation">
+                    Generador
+                    <small>LLM + contexto recuperado</small>
+                </div>
+
+                <div class="arrow">↓</div>
+
+                <div class="node output">
+                    Respuesta estructurada
+                    <small>Hechos + indicadores + citas</small>
+                </div>
+
+            </div>
+
+            <div class="features">
+                <h3>Características</h3>
+                <ul>
+                    <li>Flujo estático</li>
+                    <li>Una recuperación principal</li>
+                    <li>Sin planificación dinámica</li>
+                    <li>Menor número de llamadas al modelo</li>
+                    <li>Línea base experimental</li>
+                </ul>
+            </div>
+
+        </section>
+
+
+        <!-- ================= AGENTIC ================= -->
+
+        <section class="architecture agentic">
+
+            <div class="title">
+                Agentic RAG
+            </div>
+
+            <div class="flow">
+
+                <div class="node input">
+                    Consulta
+                    <small>Pregunta del usuario</small>
+                </div>
+
+                <div class="arrow">↓</div>
+
+                <div class="node coordinator">
+                    Coordinador
+                    <small>Planificación y decisión de ruta</small>
+                </div>
+
+                <div class="decision">
+                    Decisión dinámica
+                    <br>
+                    Recuperar → Analizar → Reintentar → Finalizar
+                </div>
+
+                <div class="arrow">↓</div>
+
+                <div class="node evidence">
+                    Agente de Evidencia
+                    <small>Buscar / reformular / recuperar</small>
+                </div>
+
+                <div class="arrow">↓</div>
+
+                <div class="node analyst">
+                    Agente Analista
+                    <small>Extraer hechos + indicadores + citas</small>
+                </div>
+
+                <div class="arrow">↓</div>
+
+                <div class="node validator">
+                    Validador determinista
+                    <small>Esquema + citas + correspondencia con evidencia</small>
+                </div>
+
+                <div class="loop">
+                    ❌ Evidencia insuficiente o validación fallida
+                    <br>
+                    → Reintento limitado
+                </div>
+
+                <div class="arrow">↓</div>
+
+                <div class="node output">
+                    Respuesta estructurada
+                    <small>Hechos + indicadores + incertidumbre + citas</small>
+                </div>
+
+            </div>
+
+            <div class="features">
+                <h3>Características</h3>
+                <ul>
+                    <li>Decisiones dinámicas durante la ejecución</li>
+                    <li>Recuperación adaptativa</li>
+                    <li>Especialización funcional</li>
+                    <li>Estado compartido y trazabilidad</li>
+                    <li>Reintentos con límite de pasos</li>
+                </ul>
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <div class="legend">
+        <span>
+            <span class="dot blue"></span>
+            Recuperación
+        </span>
+
+        <span>
+            <span class="dot purple"></span>
+            Componentes agentic
+        </span>
+
+        <span>
+            <span class="dot orange"></span>
+            Validación
+        </span>
+
+        <span>
+            <span class="dot green"></span>
+            Generación / salida
+        </span>
+    </div>
+
+</div>
+
+</body>
+</html>
