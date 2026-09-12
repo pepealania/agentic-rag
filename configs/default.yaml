@@ -4,8 +4,8 @@
 
 model:
   provider: "openai_compatible"
-  name: "llama3.1:8b"
-  base_url: "http://localhost:11434/v1"
+  name: "gpt-4o-mini"
+  base_url: "https://api.openai.com/v1"
   temperature: 0.0
   max_tokens: 1024
 
@@ -18,7 +18,7 @@ retrieval:
   chunk_size: 500
   chunk_overlap: 50
   index_path: "data/processed/index.faiss"
-  chunks_path: "data/processed/chunks.jsonl"  
+  chunks_path: "data/processed/chunks.jsonl"
 
 pipeline:
   max_iterations: 8
