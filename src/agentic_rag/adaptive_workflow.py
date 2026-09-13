@@ -16,11 +16,27 @@ class AdaptiveAgenticRAGWorkflow:
     """
     Adaptive Agentic RAG workflow.
 
-    Unlike the deterministic workflow, this workflow does not use
-    a fixed retrieve -> analyze -> validate sequence.
+    The AdaptiveCoordinator dynamically selects the next action
+    according to the current state.
 
-    The AdaptiveCoordinator selects the next action based on the
-    current state.
+    Possible actions:
+
+        retrieve
+        analyze
+        validate
+        retry_retrieval
+        retry_analysis
+        finalize
+
+    Important:
+
+    retry_retrieval and retry_analysis are REAL retry transitions.
+
+        retry_retrieval -> retrieve
+        retry_analysis  -> analyze
+
+    Therefore a retry actually executes the corresponding agent
+    again rather than merely incrementing a retry counter.
     """
 
     def __init__(
@@ -66,11 +82,20 @@ class AdaptiveAgenticRAGWorkflow:
         self.max_steps = max_steps
         self.max_retries = max_retries
 
-        # --------------------------------------------------------
-        # Build graph
-        # --------------------------------------------------------
+        # ========================================================
+        # BUILD LANGGRAPH
+        # ========================================================
 
         graph = StateGraph(AgentState)
+
+        # --------------------------------------------------------
+        # Nodes
+        # --------------------------------------------------------
+
+        graph.add_node(
+            "adaptive_router",
+            self.adaptive_router,
+        )
 
         graph.add_node(
             "retrieve",
@@ -102,21 +127,18 @@ class AdaptiveAgenticRAGWorkflow:
             self.finalize,
         )
 
-        graph.add_edge(
-            START,
-            "adaptive_router",
-        ) if False else None
-
-        # LangGraph requires an actual node for the initial route.
-        graph.add_node(
-            "adaptive_router",
-            self.adaptive_router,
-        )
+        # --------------------------------------------------------
+        # START -> adaptive router
+        # --------------------------------------------------------
 
         graph.add_edge(
             START,
             "adaptive_router",
         )
+
+        # --------------------------------------------------------
+        # Adaptive routing
+        # --------------------------------------------------------
 
         graph.add_conditional_edges(
             "adaptive_router",
@@ -131,7 +153,10 @@ class AdaptiveAgenticRAGWorkflow:
             },
         )
 
-        # Every action returns control to the adaptive coordinator.
+        # --------------------------------------------------------
+        # Normal agent execution returns to coordinator
+        # --------------------------------------------------------
+
         graph.add_edge(
             "retrieve",
             "adaptive_router",
@@ -147,15 +172,26 @@ class AdaptiveAgenticRAGWorkflow:
             "adaptive_router",
         )
 
+        # --------------------------------------------------------
+        # REAL RETRY TRANSITIONS
+        #
+        # A retry node records the retry and then executes the
+        # corresponding agent again.
+        # --------------------------------------------------------
+
         graph.add_edge(
             "retry_retrieval",
-            "adaptive_router",
+            "retrieve",
         )
 
         graph.add_edge(
             "retry_analysis",
-            "adaptive_router",
+            "analyze",
         )
+
+        # --------------------------------------------------------
+        # Finalization
+        # --------------------------------------------------------
 
         graph.add_edge(
             "finalize",
@@ -165,7 +201,7 @@ class AdaptiveAgenticRAGWorkflow:
         self.graph = graph.compile()
 
     # ============================================================
-    # ROUTER
+    # ADAPTIVE ROUTER
     # ============================================================
 
     def adaptive_router(
@@ -173,11 +209,17 @@ class AdaptiveAgenticRAGWorkflow:
         state: AgentState,
     ) -> AgentState:
 
+        decision = self.coordinator.decide(
+            state
+        )
+
         return {
-            "route": self.coordinator.decide(
-                state
-            )
+            "route": decision,
         }
+
+    # ============================================================
+    # ROUTING
+    # ============================================================
 
     def route(
         self,
@@ -213,7 +255,10 @@ class AdaptiveAgenticRAGWorkflow:
     ) -> int:
 
         step = (
-            state.get("step_count", 0)
+            state.get(
+                "step_count",
+                0,
+            )
             + 1
         )
 
@@ -237,9 +282,17 @@ class AdaptiveAgenticRAGWorkflow:
             state
         )
 
+        # --------------------------------------------------------
+        # Execute the actual retrieval agent
+        # --------------------------------------------------------
+
         result = self.evidence_agent.run(
             state
         )
+
+        # --------------------------------------------------------
+        # Count this retrieval execution
+        # --------------------------------------------------------
 
         attempts = (
             state.get(
@@ -254,17 +307,50 @@ class AdaptiveAgenticRAGWorkflow:
             [],
         )
 
-        # Explicit evidence sufficiency signal.
+        # --------------------------------------------------------
+        # Determine evidence sufficiency
+        # --------------------------------------------------------
+
         evidence_sufficient = (
             len(retrieved)
             >= self.coordinator.sufficient_evidence
         )
 
+        # --------------------------------------------------------
+        # Preserve existing tool results
+        # --------------------------------------------------------
+
+        existing_tool_results = list(
+            state.get(
+                "tool_results",
+                [],
+            )
+        )
+
+        new_tool_results = result.get(
+            "tool_results",
+            [],
+        )
+
+        if new_tool_results:
+            existing_tool_results.extend(
+                new_tool_results
+            )
+
         return {
             **result,
+
             "step_count": step,
+
             "retrieval_attempts": attempts,
-            "evidence_sufficient": evidence_sufficient,
+
+            "evidence_sufficient": (
+                evidence_sufficient
+            ),
+
+            "tool_results": (
+                existing_tool_results
+            ),
         }
 
     # ============================================================
@@ -284,16 +370,31 @@ class AdaptiveAgenticRAGWorkflow:
             + 1
         )
 
-        if retry_count > self.max_retries:
-            return {
-                "retry_count": retry_count,
-                "validation_errors": [
-                    "Retrieval retry budget exhausted."
-                ],
+        retry_history = list(
+            state.get(
+                "retry_history",
+                [],
+            )
+        )
+
+        retry_history.append(
+            {
+                "retry_number": retry_count,
+                "retry_type": "retrieval",
+                "reason": state.get(
+                    "decision_reason",
+                    "retrieval_retry_requested",
+                ),
+                "step": state.get(
+                    "step_count",
+                    0,
+                ),
             }
+        )
 
         return {
             "retry_count": retry_count,
+            "retry_history": retry_history,
         }
 
     # ============================================================
@@ -309,9 +410,17 @@ class AdaptiveAgenticRAGWorkflow:
             state
         )
 
+        # --------------------------------------------------------
+        # Execute the actual analyst agent
+        # --------------------------------------------------------
+
         result = self.analyst_agent.run(
             state
         )
+
+        # --------------------------------------------------------
+        # Count this analysis execution
+        # --------------------------------------------------------
 
         attempts = (
             state.get(
@@ -321,10 +430,37 @@ class AdaptiveAgenticRAGWorkflow:
             + 1
         )
 
+        # --------------------------------------------------------
+        # Preserve existing tool results
+        # --------------------------------------------------------
+
+        existing_tool_results = list(
+            state.get(
+                "tool_results",
+                [],
+            )
+        )
+
+        new_tool_results = result.get(
+            "tool_results",
+            [],
+        )
+
+        if new_tool_results:
+            existing_tool_results.extend(
+                new_tool_results
+            )
+
         return {
             **result,
+
             "step_count": step,
+
             "analysis_attempts": attempts,
+
+            "tool_results": (
+                existing_tool_results
+            ),
         }
 
     # ============================================================
@@ -344,15 +480,42 @@ class AdaptiveAgenticRAGWorkflow:
             + 1
         )
 
-        if retry_count > self.max_retries:
-            return {
-                "retry_count": retry_count,
+        retry_history = list(
+            state.get(
+                "retry_history",
+                [],
+            )
+        )
+
+        retry_history.append(
+            {
+                "retry_number": retry_count,
+                "retry_type": "analysis",
+                "reason": state.get(
+                    "decision_reason",
+                    "analysis_retry_requested",
+                ),
+                "step": state.get(
+                    "step_count",
+                    0,
+                ),
             }
+        )
 
         return {
             "retry_count": retry_count,
+
+            "retry_history": retry_history,
+
+            # The previous validation result no longer represents
+            # the new answer that will be generated.
             "validation_passed": False,
+
             "answer_sufficient": False,
+
+            # Clear previous validation errors because the answer
+            # will be regenerated.
+            "validation_errors": [],
         }
 
     # ============================================================
@@ -368,9 +531,17 @@ class AdaptiveAgenticRAGWorkflow:
             state
         )
 
+        # --------------------------------------------------------
+        # Execute validator
+        # --------------------------------------------------------
+
         result = self.validator.run(
             state
         )
+
+        # --------------------------------------------------------
+        # Count validation execution
+        # --------------------------------------------------------
 
         attempts = (
             state.get(
@@ -390,17 +561,31 @@ class AdaptiveAgenticRAGWorkflow:
             len(validation_errors) == 0,
         )
 
-        # An answer that passes validation is considered sufficient.
+        # --------------------------------------------------------
+        # A validated answer is sufficient only if validation
+        # actually passed.
+        # --------------------------------------------------------
+
         answer_sufficient = bool(
             passed
         )
 
         return {
             **result,
+
             "step_count": step,
+
             "validation_attempts": attempts,
+
             "validation_passed": passed,
-            "answer_sufficient": answer_sufficient,
+
+            "answer_sufficient": (
+                answer_sufficient
+            ),
+
+            "validation_errors": (
+                validation_errors
+            ),
         }
 
     # ============================================================
@@ -432,12 +617,30 @@ class AdaptiveAgenticRAGWorkflow:
                     "workflow_complete",
                 ),
                 "step": step,
+                "retrieval_attempts": state.get(
+                    "retrieval_attempts",
+                    0,
+                ),
+                "analysis_attempts": state.get(
+                    "analysis_attempts",
+                    0,
+                ),
+                "validation_attempts": state.get(
+                    "validation_attempts",
+                    0,
+                ),
+                "retry_count": state.get(
+                    "retry_count",
+                    0,
+                ),
             }
         )
 
         return {
             "route": "finalize",
+
             "step_count": step,
+
             "decision_log": decision_log,
         }
 
@@ -450,7 +653,16 @@ class AdaptiveAgenticRAGWorkflow:
         state: AgentState,
     ) -> AgentState:
 
+        # --------------------------------------------------------
+        # Make a copy so the caller's dictionary is not modified
+        # directly.
+        # --------------------------------------------------------
+
         state = dict(state)
+
+        # --------------------------------------------------------
+        # Initialize adaptive state fields
+        # --------------------------------------------------------
 
         state.setdefault(
             "retry_count",
@@ -503,7 +715,17 @@ class AdaptiveAgenticRAGWorkflow:
         )
 
         state.setdefault(
+            "validation_errors",
+            [],
+        )
+
+        state.setdefault(
             "decision_log",
+            [],
+        )
+
+        state.setdefault(
+            "retry_history",
             [],
         )
 
@@ -513,9 +735,18 @@ class AdaptiveAgenticRAGWorkflow:
         )
 
         state.setdefault(
-            "validation_errors",
-            [],
+            "route",
+            "",
         )
+
+        state.setdefault(
+            "decision_reason",
+            "",
+        )
+
+        # --------------------------------------------------------
+        # Execute graph
+        # --------------------------------------------------------
 
         return self.graph.invoke(
             state

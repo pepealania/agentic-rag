@@ -7,7 +7,8 @@ class AdaptiveCoordinator:
     """
     Adaptive decision-maker for Agentic RAG.
 
-    The coordinator chooses the next action from the current state.
+    The coordinator chooses the next action based on the
+    current state.
 
     Possible actions:
 
@@ -18,8 +19,13 @@ class AdaptiveCoordinator:
         retry_analysis
         finalize
 
-    The policy is bounded, but the path through the workflow is
-    determined at runtime.
+    Important distinction:
+
+        validation_attempts == 0
+            -> answer has NOT been validated yet
+
+        validation_attempts > 0 and validation_passed == False
+            -> validation actually FAILED
     """
 
     def __init__(
@@ -41,12 +47,15 @@ class AdaptiveCoordinator:
     # PUBLIC DECISION FUNCTION
     # ============================================================
 
-    def decide(self, state: dict[str, Any]) -> str:
-        """
-        Dynamically select the next action.
-        """
+    def decide(
+        self,
+        state: dict[str, Any],
+    ) -> str:
 
-        step_count = state.get("step_count", 0)
+        step_count = state.get(
+            "step_count",
+            0,
+        )
 
         if step_count >= self.max_steps:
             return self._record(
@@ -56,17 +65,31 @@ class AdaptiveCoordinator:
             )
 
         validation_passed = bool(
-            state.get("validation_passed", False)
+            state.get(
+                "validation_passed",
+                False,
+            )
         )
 
         answer_sufficient = bool(
-            state.get("answer_sufficient", False)
+            state.get(
+                "answer_sufficient",
+                False,
+            )
         )
 
-        evidence_sufficient = self._evidence_is_sufficient(state)
+        evidence_sufficient = (
+            self._evidence_is_sufficient(state)
+        )
 
-        retrieved = state.get("retrieved_chunks", [])
-        has_answer = state.get("answer") is not None
+        retrieved = state.get(
+            "retrieved_chunks",
+            [],
+        )
+
+        has_answer = (
+            state.get("answer") is not None
+        )
 
         retrieval_attempts = state.get(
             "retrieval_attempts",
@@ -78,27 +101,95 @@ class AdaptiveCoordinator:
             0,
         )
 
+        validation_attempts = state.get(
+            "validation_attempts",
+            0,
+        )
+
         retry_count = state.get(
             "retry_count",
             0,
         )
 
-        # --------------------------------------------------------
-        # 1. Successful answer -> finalize
-        # --------------------------------------------------------
+        # ========================================================
+        # 1. SUCCESS
+        # ========================================================
 
-        if validation_passed and answer_sufficient:
+        if (
+            has_answer
+            and validation_attempts > 0
+            and validation_passed
+            and answer_sufficient
+        ):
             return self._record(
                 state,
                 "finalize",
                 "validated_answer_is_sufficient",
             )
 
-        # --------------------------------------------------------
-        # 2. Existing answer failed validation
-        # --------------------------------------------------------
+        # ========================================================
+        # 2. NO EVIDENCE
+        # ========================================================
 
-        if has_answer and not validation_passed:
+        if not retrieved:
+            return self._record(
+                state,
+                "retrieve",
+                "no_evidence_available",
+            )
+
+        # ========================================================
+        # 3. INSUFFICIENT EVIDENCE
+        # ========================================================
+
+        if not evidence_sufficient:
+
+            if retrieval_attempts < (
+                self.max_retries + 1
+            ):
+                return self._record(
+                    state,
+                    "retry_retrieval",
+                    "evidence_is_below_sufficiency_threshold",
+                )
+
+        # ========================================================
+        # 4. EVIDENCE EXISTS BUT NO ANALYSIS
+        # ========================================================
+
+        if (
+            analysis_attempts == 0
+            and not has_answer
+        ):
+            return self._record(
+                state,
+                "analyze",
+                "evidence_available_and_analysis_required",
+            )
+
+        # ========================================================
+        # 5. ANSWER EXISTS BUT HAS NEVER BEEN VALIDATED
+        # ========================================================
+
+        if (
+            has_answer
+            and validation_attempts == 0
+        ):
+            return self._record(
+                state,
+                "validate",
+                "answer_exists_and_requires_validation",
+            )
+
+        # ========================================================
+        # 6. VALIDATION ACTUALLY FAILED
+        # ========================================================
+
+        if (
+            has_answer
+            and validation_attempts > 0
+            and not validation_passed
+        ):
 
             if retry_count >= self.max_retries:
                 return self._record(
@@ -112,71 +203,32 @@ class AdaptiveCoordinator:
                 [],
             )
 
-            # If validation indicates an evidence problem,
-            # retrieve again.
-            if self._validation_requires_more_evidence(errors):
+            # ----------------------------------------------------
+            # Validation says evidence is inadequate
+            # ----------------------------------------------------
+
+            if self._validation_requires_more_evidence(
+                errors
+            ):
                 return self._record(
                     state,
                     "retry_retrieval",
                     "validation_indicates_insufficient_evidence",
                 )
 
-            # Otherwise allow another analysis pass.
+            # ----------------------------------------------------
+            # Evidence is available -> re-analysis
+            # ----------------------------------------------------
+
             return self._record(
                 state,
                 "retry_analysis",
-                "validation_failed_but_existing_evidence_may_support_reanalysis",
+                "validation_failed_existing_evidence_supports_reanalysis",
             )
 
-        # --------------------------------------------------------
-        # 3. No evidence -> retrieve
-        # --------------------------------------------------------
-
-        if not retrieved:
-            return self._record(
-                state,
-                "retrieve",
-                "no_evidence_available",
-            )
-
-        # --------------------------------------------------------
-        # 4. Evidence is weak -> retrieve again
-        # --------------------------------------------------------
-
-        if not evidence_sufficient:
-
-            if retrieval_attempts < self.max_retries + 1:
-                return self._record(
-                    state,
-                    "retry_retrieval",
-                    "evidence_is_below_sufficiency_threshold",
-                )
-
-        # --------------------------------------------------------
-        # 5. Evidence exists but no analysis yet
-        # --------------------------------------------------------
-
-        if analysis_attempts == 0:
-            return self._record(
-                state,
-                "analyze",
-                "evidence_available_and_analysis_required",
-            )
-
-        # --------------------------------------------------------
-        # 6. Answer exists but hasn't been validated
-        # --------------------------------------------------------
-
-        if has_answer and not validation_passed:
-            return self._record(
-                state,
-                "validate",
-                "answer_exists_and_requires_validation",
-            )
-
-        # --------------------------------------------------------
-        # 7. Fallback
-        # --------------------------------------------------------
+        # ========================================================
+        # 7. ANSWER EXISTS BUT SOMETHING IS INCOMPLETE
+        # ========================================================
 
         if has_answer:
             return self._record(
@@ -184,6 +236,10 @@ class AdaptiveCoordinator:
                 "finalize",
                 "no_additional_action_required",
             )
+
+        # ========================================================
+        # 8. FALLBACK
+        # ========================================================
 
         return self._record(
             state,
@@ -200,7 +256,9 @@ class AdaptiveCoordinator:
         state: dict[str, Any],
     ) -> bool:
 
-        explicit = state.get("evidence_sufficient")
+        explicit = state.get(
+            "evidence_sufficient"
+        )
 
         if explicit is not None:
             return bool(explicit)
@@ -210,9 +268,10 @@ class AdaptiveCoordinator:
             [],
         )
 
-        count = len(retrieved)
-
-        return count >= self.sufficient_evidence
+        return (
+            len(retrieved)
+            >= self.sufficient_evidence
+        )
 
     # ============================================================
     # VALIDATION INTERPRETATION
@@ -257,9 +316,11 @@ class AdaptiveCoordinator:
         reason: str,
     ) -> str:
 
-        log = state.setdefault(
-            "decision_log",
-            [],
+        log = list(
+            state.get(
+                "decision_log",
+                [],
+            )
         )
 
         log.append(
@@ -283,9 +344,14 @@ class AdaptiveCoordinator:
                     "validation_attempts",
                     0,
                 ),
+                "retry_count": state.get(
+                    "retry_count",
+                    0,
+                ),
             }
         )
 
+        state["decision_log"] = log
         state["route"] = decision
         state["decision_reason"] = reason
 
