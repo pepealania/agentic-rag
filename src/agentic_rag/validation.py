@@ -78,7 +78,6 @@ def validate_answer(
 
     return errors
 
-
 class AnswerValidator:
     """Deterministic validator for Agentic RAG answers."""
 
@@ -91,12 +90,17 @@ class AnswerValidator:
             retrieved_chunks,
         )
 
-        decision_log = list(state.get("decision_log", []))
+        passed = len(errors) == 0
 
-        if errors:
-            decision = "validation_failed"
-        else:
-            decision = "validation_passed"
+        decision = (
+            "validation_passed"
+            if passed
+            else "validation_failed"
+        )
+
+        decision_log = list(
+            state.get("decision_log", [])
+        )
 
         decision_log.append(
             {
@@ -108,5 +112,7 @@ class AnswerValidator:
 
         return {
             "validation_errors": errors,
+            "validation_passed": passed,
+            "answer_sufficient": passed,
             "decision_log": decision_log,
         }
