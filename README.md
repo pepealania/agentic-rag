@@ -401,7 +401,7 @@ The main baseline implementation is located in:
 
 ```text
 src/rag_baseline.py
-
+```
 ## 3.3 Deterministic Agentic RAG — 🟡 Implemented
 
 The Deterministic Agentic RAG pipeline extends the baseline RAG system with an explicit, predefined control workflow.
