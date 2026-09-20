@@ -401,3 +401,33 @@ The main baseline implementation is located in:
 
 ```text
 src/rag_baseline.py
+
+## 3.3 Deterministic Agentic RAG — 🟡 Implemented
+
+The Deterministic Agentic RAG pipeline extends the baseline RAG system with an explicit, predefined control workflow.
+
+Unlike the baseline pipeline, which performs a fixed retrieval-and-generation process, the deterministic agentic pipeline introduces agentic control decisions while maintaining a fixed execution policy. The sequence of operations and stopping conditions are defined by the experiment configuration and execution logic.
+
+### Current implementation
+
+The current implementation includes:
+
+- iterative retrieval and answer generation;
+- configurable maximum number of iterations;
+- explicit evaluation of retrieved evidence;
+- deterministic control flow between retrieval and generation steps;
+- evidence-based decision making;
+- document and chunk citations;
+- retrieval scores;
+- structured intermediate and final outputs;
+- evidence/citation validation;
+- experiment-level artifact tracking.
+
+The deterministic workflow is designed to provide a controlled intermediate system between the baseline RAG and the more flexible adaptive agentic architecture.
+
+### Implementation
+
+The main implementation is located in:
+
+```text
+src/agentic_rag/
