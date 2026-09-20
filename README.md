@@ -431,3 +431,44 @@ The main implementation is located in:
 
 ```text
 src/agentic_rag/
+```
+
+## 3.4 Adaptive Agentic RAG — 🟡 Implemented
+
+The Adaptive Agentic RAG pipeline extends the deterministic agentic workflow by allowing the system to dynamically determine how to proceed based on the state of the current task.
+
+Instead of following a fixed sequence of retrieval iterations, the adaptive pipeline evaluates the available evidence and selects the next action according to the current retrieval and generation state.
+
+### Possible actions
+
+Possible actions include:
+
+- accepting the current evidence and generating a final answer;
+- performing an additional retrieval step;
+- refining the information need;
+- continuing the reasoning and evidence-gathering process;
+- terminating the workflow when sufficient evidence has been obtained;
+- terminating when the configured iteration limit is reached.
+
+### Current implementation
+
+The current implementation includes:
+
+- iterative retrieval;
+- adaptive control decisions;
+- evidence sufficiency evaluation;
+- configurable iteration limits;
+- dynamic workflow progression;
+- document and chunk citations;
+- retrieval scores;
+- structured intermediate and final outputs;
+- evidence/citation validation;
+- experiment-level artifact tracking.
+
+### Implementation
+
+The main implementation is located in:
+
+```text
+src/agentic_rag/
+```
