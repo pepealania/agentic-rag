@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Agentic RAG Architecture Diagram</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            color: #2d3748;
+            background-color: #f7fafc;
+            margin: 0;
+            padding: 24px;
+        }
+        .architecture-container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .header-section {
+            text-align: center;
+            margin-bottom: 28px;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 16px;
+        }
+        .header-section h2 {
+            margin: 0 0 6px 0;
+            color: #1a202c;
+        }
+        .header-section p {
+            margin: 0;
+            color: #718096;
+            font-size: 0.95rem;
+        }
+        
+        /* Two-Column Grid Setup */
+        .graph-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            position: relative;
+            margin-bottom: 32px;
+        }
+
+        .column-title {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #cbd5e0;
+        }
+
+        /* Specialized Node styling mapping LangGraph classes */
+        .graph-node {
+            padding: 14px 18px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 2px solid #cbd5e0;
+            position: relative;
+            width: 85%;
+        }
+        
+        /* Node Categories styling */
+        .node-entry {
+            background-color: #2d3748;
+            color: #ffffff;
+            border-color: #1a202c;
+            border-radius: 20px;
+        }
+        .node-router {
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+            border-color: #4299e1;
+            border-style: double;
+            border-width: 4px;
+        }
+        .node-agent {
+            background-color: #edf2f7;
+            color: #2d3748;
+            border-color: #cbd5e0;
+        }
+        .node-retry {
+            background-color: #fffaf0;
+            color: #dd6b20;
+            border-color: #f6ad55;
+            width: 45%;
+        }
+        .node-exit {
+            background-color: #f7fafc;
+            color: #4a5568;
+            border-color: #a0aec0;
+            border-radius: 20px;
+        }
+
+        /* Directional Paths Structure */
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            background-color: #fafbfc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px dashed #e2e8f0;
+        }
+
+        /* Visual connection sub-labels */
+        .edge-label {
+            font-size: 0.75rem;
+            color: #718096;
+            font-weight: bold;
+            background: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            width: fit-content;
+        }
+
+        .loop-indicator {
+            font-size: 0.75rem;
+            color: #3182ce;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* Group wrapper for unified agent/retry execution flows */
+        .agent-retry-group {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .retry-arrow {
+            color: #dd6b20;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 0 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="architecture-container">
+    <div class="header-section">
+        <h2>🛠️ Adaptive Agentic RAG Framework</h2>
+        <p>StateGraph Architecture (LangGraph Engine & Two-Column Separation)</p>
+    </div>
+
+    <div class="graph-wrapper">
+        
+        <!-- COLUMN 1: CONTROL HUB & STATE ROUTING -->
+        <div class="column">
+            <div class="column-title">⚙️ Control & Routing Hub</div>
+            
+            <div class="graph-node node-entry">START</div>
+            <div class="edge-label">graph.add_edge</div>
+            
+            <div class="graph-node node-router">Node: adaptive_router</div>
+            <div class="edge-label">self.route() conditional branch</div>
+            
+            <div class="graph-node node-agent" style="background-color: #e6fffa; border-color: #319795; color: #234e52;">Node: finalize</div>
+            <div class="edge-label">graph.add_edge</div>
+            
+            <div class="graph-node node-exit">END</div>
+        </div>
+
+        <!-- COLUMN 2: EXECUTION PIPELINES & RETRY CIRCUITS -->
+        <div class="column">
+            <div class="column-title">🏃‍♂️ Execution & Retry Layers</div>
+            
+            <!-- Retrieval Block Group -->
+            <div class="agent-retry-group">
+                <div style="width: 50%;">
+                    <div class="graph-node node-agent" style="width: 100%;">Node: retrieve</div>
+                    <div class="loop-indicator">↩️ Loops to router</div>
+                </div>
+                <div class="retry-arrow">⇠</div>
+                <div class="graph-node node-retry" style="width: 40%;">retry_retrieval</div>
+            </div>
+
+            <!-- Analysis Block Group -->
+            <div class="agent-retry-group">
+                <div style="width: 50%;">
+                    <div class="graph-node node-agent" style="width: 100%;">Node: analyze</div>
+                    <div class="loop-indicator">↩️ Loops to router</div>
+                </div>
+                <div class="retry-arrow">⇠</div>
+                <div class="graph-node node-retry" style="width: 40%;">retry_analysis</div>
+            </div>
+
+            <!-- Validation Block Group (No local retry, falls back to routing loop) -->
+            <div class="agent-retry-group" style="justify-content: center;">
+                <div style="width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                    <div class="graph-node node-agent" style="width: 90%;">Node: validate</div>
+                    <div class="loop-indicator">↩️ Loops to router</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Graph Connectivity Footnote -->
+    <div style="font-size: 0.8rem; background-color: #f7fafc; padding: 12px; border-radius: 8px; border: 1px dashed #cbd5e0;">
+        <strong>📌 Architecture Routing Behavior:</strong><br>
+        All worker nodes in the <strong>Execution Column</strong> naturally route state transactions back to the <code>adaptive_router</code> on completion. However, if the coordinator triggers a true exception recovery state, the <code>retry_*</code> sub-nodes override the router path and cycle straight back into their designated parent worker task.
+    </div>
+</div>
+
+</body>
+</html>

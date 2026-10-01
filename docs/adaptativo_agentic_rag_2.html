@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Agentic RAG — Topología de Arquitectura Real</title>
+    <style>
+        :root {
+            --bg-primary: #0a0f24;
+            --bg-surface: #121833;
+            --border-tech: #1a234a;
+            --text-main: #ffffff;
+            --text-muted: #8fa0dd;
+            
+            /* Colores de la Topología Hub-and-Spoke */
+            --accent-hub: #a855f7;       /* Cerebro Central */
+            --accent-agent: #00f2fe;     /* Sub-Agentes Activos */
+            --accent-reset: #ff3b30;     /* Nodos de Transición y Reset */
+            --accent-metrics: #4cd964;   /* Consolidación de Telemetría */
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            border: 1px solid var(--border-tech);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px dashed var(--border-tech);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        .repo-badge {
+            display: inline-block;
+            background: #0d153a;
+            color: var(--accent-hub);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-family: monospace;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Filas de la Arquitectura */
+        .architecture-row {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            border: 1px solid var(--border-tech);
+            border-radius: 8px;
+            background: rgba(13, 21, 58, 0.2);
+            overflow: hidden;
+        }
+
+        .row-header {
+            padding: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            border-right: 1px solid var(--border-tech);
+            position: relative;
+        }
+
+        .row-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .row-body {
+            padding: 20px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* Tarjetas de Nodos */
+        .card-node {
+            background: #090e29;
+            border: 1px solid var(--border-tech);
+            border-radius: 6px;
+            padding: 12px 14px;
+            min-width: 185px;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .card-node .title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-node .subtitle {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .card-node .state-mut {
+            font-size: 10px;
+            color: #a855f7;
+            margin-top: 6px;
+            display: block;
+        }
+
+        .arrow-connector {
+            color: var(--text-muted);
+            font-size: 18px;
+            user-select: none;
+        }
+
+        /* Clases Temáticas por Fila */
+        .h-hub .row-header::before { background-color: var(--accent-hub); }
+        .h-hub .row-header { color: var(--accent-hub); }
+
+        .h-agents .row-header::before { background-color: var(--accent-agent); }
+        .h-agents .row-header { color: var(--accent-agent); }
+
+        .h-resets .row-header::before { background-color: var(--accent-reset); }
+        .h-resets .row-header { color: var(--accent-reset); }
+
+        .h-metrics .row-header::before { background-color: var(--accent-metrics); }
+        .h-metrics .row-header { color: var(--accent-metrics); }
+
+        .badge-init {
+            background: #1e1b4b;
+            color: #c084fc;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 10px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Adaptive Agentic RAG — Arquitectura Real de LangGraph</h1>
+        <div class="repo-badge">AdaptiveAgenticRAGWorkflow (Topología en Estrella)</div>
+    </header>
+
+    <div class="flow-container">
+
+        <!-- FILA 1: EL HUB CENTRAL DE ENRUTAMIENTO -->
+        <div class="architecture-row h-hub">
+            <div class="row-header">1. Hub de Control Central</div>
+            <div class="row-body">
+                <div class="card-node">
+                    <div class="title">🏁 START</div>
+                    <div class="subtitle">workflow.run()</div>
+                    <span class="badge-init">Setea variables por defecto</span>
+                </div>
+                <div class="arrow-connector">→</div>
+                <div class="card-node" style="border-color: var(--accent-hub);">
+                    <div class="title">🧠 adaptive_router</div>
+                    <div class="subtitle">coordinator.decide(state)</div>
+                    <span class="state-mut">Muta: state["route"]</span>
+                </div>
+                <div class="arrow-connector">⇄</div>
+                <div class="card-node">
+                    <div class="title">🔀 route(state)</div>
+                    <div class="subtitle">Conditional Routing</div>
+                    <span class="state-mut" style="color: var(--text-muted)">Enruta dinámicamente según la decisión</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="arrow-connector" style="text-align: center;">↓</div>
+
+        <!-- FILA 2: SUB-AGENTES EN ESTRELLA (RETORNO OBLIGATORIO) -->
+        <div class="architecture-row h-agents">
+            <div class="row-header">2. Sub-Agentes de Ejecución</div>
+            <div class="row-body">
+                <div class="card-node" style="border-color: var(--accent-agent);">
+                    <div class="title">🔍 retrieve</div>
+                    <div class="subtitle">EvidenceAgent.run()</div>
+                    <span class="badge-init" style="background:#1e293b; color:#38bdf8;">retrieval_attempts += 1</span>
+                </div>
+                <div class="card-node" style="border-color: #ff9500;">
+                    <div class="title">📝 analyze</div>
+                    <div class="subtitle">AnalystAgent.run()</div>
+                    <span class="badge-init" style="background:#1e293b; color:#ff9500;">analysis_attempts += 1</span>
+                </div>
+                <div class="card-node" style="border-color: #ff3b30;">
+                    <div class="title">⚖️ validate</div>
+                    <div class="subtitle">AnswerValidator.run()</div>
+                    <span class="badge-init" style="background:#1e293b; color:#ff3b30;">validation_attempts += 1</span>
+                </div>
+                <div class="arrow-connector">➔</div>
+                <div class="card-node" style="background: rgba(168, 85, 247, 0.05); border-color: var(--accent-hub);">
+                    <div class="title">🔄 Retorno al Hub</div>
+                    <div class="subtitle">graph.add_edge()</div>
+                    <span class="state-mut">Los sub-agentes siempre regresan al router</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="arrow-connector" style="text-align: center;">↓</div>
+
+        <!-- FILA 3: NODOS DE REINTENTO REAL CON RESET DE MEMORIA -->
+        <div class="architecture-row h-resets">
+            <div class="row-header">3. Nodos de Reintento Real</div>
+            <div class="row-body">
+                <div class="card-node" style="border-color: var(--accent-reset);">
+                    <div class="title">⚙️ retry_analysis</div>
+                    <div class="subtitle">Reset de Estado</div>
+                    <span class="badge-init" style="background:#451a03; color:#f97316;">validation_errors = []</span>
+                    <span class="badge-init" style="background:#451a03; color:#f97316;">answer_sufficient = False</span>
+                </div>
+                <div class="card-node">
+                    <div class="title">🔄 retry_retrieval</div>
+                    <div class="subtitle">Historial de Reintentos</div>
+                    <span class="badge-init" style="background:#1e293b; color:#94a3b8;">retry_count += 1</span>
+                </div>
+                <div class="arrow-connector">➔</div>
+                <div class="card-node" style="border-color: var(--accent-agent);">
+                    <div class="title">🎯 Re-ejecución Activa</div>
+                    <div class="subtitle">Transiciones Directas</div>
+                    <span class="state-mut" style="color: var(--accent-agent)">retry_analysis ➔ ejecuta analyze</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="arrow-connector" style="text-align: center;">↓</div>
+
+        <!-- FILA 4: COMPILACIÓN DE TELEMETRÍA Y CIERRE (FINALIZE -> END) -->
+        <!-- FILA 4: COMPILACIÓN DE TELEMETRÍA Y CIERRE (FINALIZE -> END) -->
+        <div class="architecture-row h-metrics">
+            <div class="row-header">4. Consolidación de Métricas</div>
+            <div class="row-body">
+                <div class="card-node" style="border-color: var(--accent-metrics);">
+                    <div class="title">📋 finalize</div>
+                    <div class="subtitle">Compilación en decision_log</div>
+                    <span class="state-mut" style="color: var(--accent-metrics)">Guarda intentos de cada agente</span>
+                </div>
+                <div class="arrow-connector">→</div>
+                <div class="card-node" style="background: #4c0519; border-color: #ef4444;">
+                    <div class="title">🛑 END</div>
+                    <div class="subtitle">graph.add_edge(finalize, END)</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>		

@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Classic Baseline RAG — Arquitectura del Pipeline</title>
+
+    <style>
+        :root {
+            --bg-primary: #0a0f24;
+            --bg-surface: #121833;
+            --bg-card: #090e29;
+            --border-tech: #1a234a;
+
+            --text-main: #ffffff;
+            --text-muted: #8fa0dd;
+
+            --accent-ingest: #00f2fe;
+            --accent-index: #1d63ff;
+            --accent-retrieval: #9b5de5;
+            --accent-generation: #4cd964;
+            --accent-validation: #ffb703;
+
+            --offline-bg: rgba(29, 99, 255, 0.06);
+            --online-bg: rgba(155, 93, 229, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family:
+                'Segoe UI',
+                -apple-system,
+                BlinkMacSystemFont,
+                Roboto,
+                sans-serif;
+
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+
+            margin: 0;
+            padding: 40px 20px;
+
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1180px;
+
+            background: var(--bg-surface);
+
+            border-radius: 14px;
+            padding: 32px;
+
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.6);
+
+            border: 1px solid var(--border-tech);
+        }
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        header {
+            text-align: center;
+
+            margin-bottom: 30px;
+
+            border-bottom:
+                1px dashed var(--border-tech);
+
+            padding-bottom: 22px;
+        }
+
+        h1 {
+            margin: 0 0 8px 0;
+
+            font-size: 27px;
+
+            letter-spacing: 0.5px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+
+            font-size: 13px;
+
+            margin-top: 6px;
+        }
+
+        .repo-badge {
+            display: inline-block;
+
+            background: #0d153a;
+
+            color: var(--accent-ingest);
+
+            padding: 5px 13px;
+
+            border-radius: 20px;
+
+            font-size: 11px;
+
+            font-family: monospace;
+
+            border:
+                1px solid rgba(
+                    0,
+                    242,
+                    254,
+                    0.3
+                );
+
+            margin-top: 10px;
+        }
+
+        /* =====================================================
+           EXECUTION PHASES
+        ===================================================== */
+
+        .phase {
+            border-radius: 10px;
+
+            padding: 18px;
+
+            margin-bottom: 18px;
+
+            border: 1px solid var(--border-tech);
+        }
+
+        .phase-offline {
+            background: var(--offline-bg);
+
+            border-color:
+                rgba(
+                    29,
+                    99,
+                    255,
+                    0.35
+                );
+        }
+
+        .phase-online {
+            background: var(--online-bg);
+
+            border-color:
+                rgba(
+                    155,
+                    93,
+                    229,
+                    0.35
+                );
+        }
+
+        .phase-header {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            margin-bottom: 16px;
+        }
+
+        .phase-title {
+            font-size: 14px;
+
+            font-weight: bold;
+
+            letter-spacing: 0.8px;
+
+            text-transform: uppercase;
+        }
+
+        .phase-offline .phase-title {
+            color: var(--accent-index);
+        }
+
+        .phase-online .phase-title {
+            color: var(--accent-retrieval);
+        }
+
+        .phase-description {
+            color: var(--text-muted);
+
+            font-size: 11px;
+
+            text-align: right;
+        }
+
+        /* =====================================================
+           PIPELINE
+        ===================================================== */
+
+        .architecture-flow {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 14px;
+        }
+
+        .stage-block {
+            display: grid;
+
+            grid-template-columns:
+                220px 1fr;
+
+            background:
+                rgba(
+                    13,
+                    21,
+                    58,
+                    0.55
+                );
+
+            border:
+                1px solid var(--border-tech);
+
+            border-radius: 9px;
+
+            overflow: hidden;
+        }
+
+        /* =====================================================
+           STAGE HEADER
+        ===================================================== */
+
+        .stage-header {
+            padding: 18px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: center;
+
+            font-weight: bold;
+
+            font-size: 13px;
+
+            letter-spacing: 0.7px;
+
+            text-transform: uppercase;
+
+            border-right:
+                1px solid var(--border-tech);
+
+            position: relative;
+        }
+
+        .stage-number {
+            font-size: 10px;
+
+            color: var(--text-muted);
+
+            margin-bottom: 5px;
+
+            font-weight: normal;
+        }
+
+        .stage-header::before {
+            content: '';
+
+            position: absolute;
+
+            left: 0;
+            top: 0;
+            bottom: 0;
+
+            width: 4px;
+        }
+
+        .layer-ingest .stage-header::before {
+            background:
+                var(--accent-ingest);
+        }
+
+        .layer-ingest .stage-header {
+            color:
+                var(--accent-ingest);
+        }
+
+        .layer-index .stage-header::before {
+            background:
+                var(--accent-index);
+        }
+
+        .layer-index .stage-header {
+            color:
+                var(--accent-index);
+        }
+
+        .layer-retrieval .stage-header::before {
+            background:
+                var(--accent-retrieval);
+        }
+
+        .layer-retrieval .stage-header {
+            color:
+                var(--accent-retrieval);
+        }
+
+        .layer-generation .stage-header::before {
+            background:
+                var(--accent-generation);
+        }
+
+        .layer-generation .stage-header {
+            color:
+                var(--accent-generation);
+        }
+
+        /* =====================================================
+           STAGE BODY
+        ===================================================== */
+
+        .stage-body {
+            padding: 16px;
+
+            display: flex;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+            align-items: center;
+        }
+
+        /* =====================================================
+           COMPONENT CARDS
+        ===================================================== */
+
+        .component-card {
+            background:
+                var(--bg-card);
+
+            border:
+                1px solid var(--border-tech);
+
+            border-radius: 7px;
+
+            padding:
+                11px 14px;
+
+            min-width: 140px;
+
+            max-width: 220px;
+
+            font-size: 12px;
+
+            box-shadow:
+                0 4px 12px
+                rgba(0, 0, 0, 0.25);
+        }
+
+        .component-card .title {
+            font-weight: 600;
+
+            margin-bottom: 5px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 6px;
+        }
+
+        .component-card .details {
+            font-size: 10px;
+
+            line-height: 1.4;
+
+            color:
+                var(--text-muted);
+        }
+
+        /* =====================================================
+           SPECIAL CARDS
+        ===================================================== */
+
+        .embedding-card {
+            border-color:
+                rgba(
+                    29,
+                    99,
+                    255,
+                    0.65
+                );
+        }
+
+        .faiss-card {
+            border-color:
+                rgba(
+                    29,
+                    99,
+                    255,
+                    0.8
+                );
+
+            border-bottom:
+                3px solid
+                var(--accent-index);
+        }
+
+        .query-embedding-card {
+            border-color:
+                rgba(
+                    155,
+                    93,
+                    229,
+                    0.7
+                );
+        }
+
+        .search-card {
+            border-color:
+                rgba(
+                    155,
+                    93,
+                    229,
+                    0.8
+                );
+        }
+
+        .llm-card {
+            border-color:
+                rgba(
+                    76,
+                    217,
+                    100,
+                    0.65
+                );
+        }
+
+        .validation-card {
+            border-color:
+                rgba(
+                    255,
+                    183,
+                    3,
+                    0.75
+                );
+        }
+
+        /* =====================================================
+           ARROWS
+        ===================================================== */
+
+        .flow-arrow {
+            text-align: center;
+
+            color:
+                var(--text-muted);
+
+            font-size: 17px;
+
+            user-select: none;
+
+            min-width: 18px;
+        }
+
+        .vertical-arrow {
+            text-align: center;
+
+            color:
+                var(--text-muted);
+
+            font-size: 20px;
+
+            height: 12px;
+
+            line-height: 12px;
+        }
+
+        /* =====================================================
+           INDEX READY CONNECTOR
+        ===================================================== */
+
+        .index-ready {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            margin: 4px 0;
+
+            padding: 9px 14px;
+
+            border:
+                1px dashed
+                rgba(
+                    29,
+                    99,
+                    255,
+                    0.5
+                );
+
+            border-radius: 7px;
+
+            background:
+                rgba(
+                    29,
+                    99,
+                    255,
+                    0.07
+                );
+
+            color:
+                var(--accent-index);
+
+            font-size: 11px;
+
+            font-weight: 600;
+        }
+
+        .index-ready .icon {
+            font-size: 16px;
+        }
+
+        /* =====================================================
+           QUERY LOOP INDICATOR
+        ===================================================== */
+
+        .query-loop {
+            margin-top: 4px;
+
+            padding: 9px 14px;
+
+            border:
+                1px dashed
+                rgba(
+                    155,
+                    93,
+                    229,
+                    0.45
+                );
+
+            border-radius: 7px;
+
+            color:
+                var(--accent-retrieval);
+
+            background:
+                rgba(
+                    155,
+                    93,
+                    229,
+                    0.06
+                );
+
+            font-size: 10px;
+
+            text-align: center;
+        }
+
+        /* =====================================================
+           SUMMARY
+        ===================================================== */
+
+        .summary {
+            margin-top: 22px;
+
+            padding: 18px;
+
+            background:
+                rgba(
+                    9,
+                    14,
+                    41,
+                    0.75
+                );
+
+            border:
+                1px solid var(--border-tech);
+
+            border-radius: 8px;
+
+            text-align: center;
+        }
+
+        .summary-title {
+            color:
+                var(--accent-generation);
+
+            font-weight: bold;
+
+            font-size: 13px;
+
+            margin-bottom: 8px;
+        }
+
+        .summary-text {
+            color:
+                var(--text-muted);
+
+            font-size: 11px;
+
+            line-height: 1.7;
+        }
+
+        .highlight {
+            color:
+                var(--text-main);
+
+            font-weight: 600;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 850px) {
+
+            .stage-block {
+                grid-template-columns: 1fr;
+            }
+
+            .stage-header {
+                border-right: none;
+
+                border-bottom:
+                    1px solid
+                    var(--border-tech);
+            }
+
+            .stage-header::before {
+                width: 100%;
+
+                height: 3px;
+
+                top: 0;
+
+                bottom: auto;
+            }
+
+            .stage-body {
+                justify-content: center;
+            }
+
+            .phase-header {
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                gap: 5px;
+            }
+
+            .phase-description {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header>
+
+        <h1>
+            Classic Baseline RAG — Arquitectura del Pipeline
+        </h1>
+
+        <div class="subtitle">
+            Separación entre indexación offline y ejecución por consulta
+        </div>
+
+        <div class="repo-badge">
+            rag_baseline.py
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         FASE OFFLINE
+    ====================================================== -->
+
+    <div class="phase phase-offline">
+
+        <div class="phase-header">
+
+            <div class="phase-title">
+                ⚙️ FASE OFFLINE — PREPARACIÓN DEL ÍNDICE
+            </div>
+
+            <div class="phase-description">
+                Se ejecuta al construir o reconstruir el índice
+            </div>
+
+        </div>
+
+
+        <div class="architecture-flow">
+
+            <!-- =================================================
+                 ETAPA 1
+            ================================================== -->
+
+            <div class="stage-block layer-ingest">
+
+                <div class="stage-header">
+
+                    <div class="stage-number">
+                        ETAPA 01
+                    </div>
+
+                    Ingestión de Datos
+
+                </div>
+
+
+                <div class="stage-body">
+
+                    <div class="component-card">
+
+                        <div class="title">
+                            📁 Documentos JSONL
+                        </div>
+
+                        <div class="details">
+                            Corpus documental
+                        </div>
+
+                    </div>
+
+
+                    <div class="flow-arrow">
+                        →
+                    </div>
+
+
+                    <div class="component-card">
+
+                        <div class="title">
+                            📥 Carga
+                        </div>
+
+                        <div class="details">
+                            load_documents()
+                        </div>
+
+                    </div>
+
+
+                    <div class="flow-arrow">
+                        →
+                    </div>
+
+
+                    <div class="component-card">
+
+                        <div class="title">
+                            📋 Documentos
+                        </div>
+
+                        <div class="details">
+                            document_id +
+                            content + metadata
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="vertical-arrow">
+                ↓
+            </div>
+
+
+            <!-- =================================================
+                 ETAPA 2
+            ================================================== -->
+
+            <div class="stage-block layer-index">
+
+                <div class="stage-header">
+
+                    <div class="stage-number">
+                        ETAPA 02
+                    </div>
+
+                    Chunking e Indexación
+
+                </div>
+
+
+                <div class="stage-body">
+
+                    <div class="component-card">
+
+                        <div class="title">
+                            ✂️ Chunking
+                        </div>
+
+                        <div class="details">
+                            chunk_size = 500
+                            <br>
+                            overlap = 50
+                        </div>
+
+                    </div>
+
+
+                    <div class="flow-arrow">
+                        →
+                    </div>
+
+
+                    <div class="component-card embedding-card">
+
+                        <div class="title">
+                            🧬 Embeddings
+                        </div>
+
+                        <div class="details">
+                            SentenceTransformer
+                            <br>
+                            all-MiniLM-L6-v2
+                            <br>
+                            vectorización de chunks
+                        </div>
+
+                    </div>
+
+
+                    <div class="flow-arrow">
+                        →
+                    </div>
+
+
+                    <div class="component-card faiss-card">
+
+                        <div class="title">
+                            🗄️ FAISS
+                        </div>
+
+                        <div class="details">
+                            IndexFlatIP
+                            <br>
+                            vectores normalizados
+                            <br>
+                            Inner Product ≈ Cosine
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 INDEX READY
+            ================================================== -->
+
+            <div class="index-ready">
+
+                <div class="icon">
+                    ✓
+                </div>
+
+                <div>
+                    ÍNDICE LISTO —
+                    Los embeddings de los chunks ya están
+                    almacenados en el índice FAISS.
+                    La indexación no se repite por cada pregunta.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FASE ONLINE
+    ====================================================== -->
+
+    <div class="phase phase-online">
+
+        <div class="phase-header">
+
+            <div class="phase-title">
+                🔎 FASE ONLINE — EJECUCIÓN POR QUERY
+            </div>
+
+            <div class="phase-description">
+                Estas etapas se ejecutan cada vez que llega una pregunta
+            </div>
+
+        </div>
+
+
+        <div class="architecture-flow">
+
+            <!-- =================================================
+                 ETAPA 3
+            ================================================== -->
+
+            <div class="stage-block layer-retrieval">
+
+                <div class="stage-header">
+
+                    <div class="stage-number">
+                        ETAPA 03
+                    </div>
+
+                    Recuperación de Contexto
+
+                </div>
+
+
+                <div class="stage-body">
+
+                    <div class="component-card">
+
+                        <div class="title">
+                            ❓ Pregunta
+                        </div>
+
+                        <div class="details">
+                            Query del usuario /
+                            pregunta del dataset
+                        </div>
+
+                    </div>
+
+
+                    <div class="flow-arrow">
+                        →
+                    </div>
+
+
+                    <div class="component-card query-embedding-card">
+
+                        <div class="title">
+                            🧬 Query Embedding
+                        </div>
+
+                        <div class="details">
+                            Mismo
+                            SentenceTransformer
+                            <br>
+                            vectorización de la pregunta
+                        </div>
+
+                    </div>
+
+
+                    <div class="flow-arrow">
+                        →
+                    </div>
+
+
+                    <div class="component-card search-card">
+
+                        <div class="title">
+                            🔍 FAISS Search
+                        </div>
+
+                        <div class="details">
+                            query_embedding
+                            <br>
+                            IndexFlatIP.search()
+                            <br>
+                            Top-K = 5
+                        </div>
+
+                    </div>
+
+
+                    <div class="flow-arrow">
+                        →
+                    </div>
+
+
+                    <div class="component-card">
+
+                        <div class="title">
+                            📌 Chunks recuperados
+                        </div>
+
+                        <div class="details">
+                            indices →
+                            self.chunks[index]
+                            <br>
+                            texto + metadata + score
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="vertical-arrow">
+                ↓
+            </div>
+
+
+            <!-- =================================================
+                 ETAPA 4
+            ================================================== -->
+
+            <div class="stage-block layer-generation">
+
+                <div class="stage-header">
+
+                    <div class="stage-number">
+                        ETAPA 04
+                    </div>
+
+                    Generación y Validación
+
+                </div>
+
+
+                <div class="stage-body">
+
+                    <div class="component-card">
+
+                        <div class="title">
+                            📌 Prompt
+                        </div>
+
+                        <div class="details">
+                            Pregunta +
+                            evidencia recuperada
+                            <br>
+                            reglas de grounding
+                        </div>
+
+                    </div>
+
+
+                    <div class="flow-arrow">
+                        →
+                    </div>
+
+
+                    <div class="component-card llm-card">
+
+                        <div class="title">
+                            🤖 LLM
+                        </div>
+
+                        <div class="details">
+                            OpenAI-compatible API
+                            <br>
+                            temperature = 0.0
+                            <br>
+                            max_tokens = 1024
+                        </div>
+
+                    </div>
+
+
+                    <div class="flow-arrow">
+                        →
+                    </div>
+
+
+                    <div class="component-card">
+
+                        <div class="title">
+                            📝 JSON
+                        </div>
+
+                        <div class="details">
+                            answer
+                            <br>
+                            citations
+                            <br>
+                            abstained
+                        </div>
+
+                    </div>
+
+
+                    <div class="flow-arrow">
+                        →
+                    </div>
+
+
+                    <div class="component-card validation-card">
+
+                        <div class="title">
+                            ✅ Validación
+                        </div>
+
+                        <div class="details">
+                            JSON válido
+                            <br>
+                            Citation validity
+                            <br>
+                            latencias
+                        </div>
+
+                    </div>
+
+
+                    <div class="flow-arrow">
+                        →
+                    </div>
+
+
+                    <div class="component-card">
+
+                        <div class="title">
+                            📊 Resultado
+                        </div>
+
+                        <div class="details">
+                            Métricas +
+                            resultado experimental
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 QUERY LOOP
+            ================================================== -->
+
+            <div class="query-loop">
+
+                ↻
+                NUEVA PREGUNTA →
+                ETAPA 03 →
+                ETAPA 04 →
+                NUEVA PREGUNTA
+
+                <br>
+
+                El índice FAISS permanece disponible
+                y no se reconstruye para cada query.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY
+    ====================================================== -->
+
+    <div class="summary">
+
+        <div class="summary-title">
+            IDEA CLAVE DEL BASELINE
+        </div>
+
+        <div class="summary-text">
+
+            <span class="highlight">
+                Indexación offline:
+            </span>
+
+            documentos →
+            chunks →
+            embeddings →
+            índice FAISS.
+
+            <br>
+
+            <span class="highlight">
+                Ejecución online:
+            </span>
+
+            pregunta →
+            embedding de query →
+            FAISS Search →
+            chunks recuperados →
+            prompt →
+            LLM →
+            validación.
+
+            <br>
+
+            La única vectorización que ocurre
+            <span class="highlight">
+                por cada pregunta
+            </span>
+            es la del embedding de la query.
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

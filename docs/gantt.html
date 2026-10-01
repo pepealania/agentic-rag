@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronograma de Tesis RAG Actualizado</title>
+    <style>
+        :root {
+            --bg-primary: #0a0f24;
+            --bg-surface: #121833;
+            --bg-grid: #1a234a;
+            --text-main: #ffffff;
+            --text-muted: #8fa0dd;
+            --col-completed: #1d63ff;
+            --col-current: #ff3b30;
+            --col-next: #ff9500;
+            --col-final: #4cd964;
+            --col-sustentacion: #9b5de5;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1350px;
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            overflow-x: auto;
+        }
+
+        h1, .subtitle { text-align: center; margin: 0; }
+        h1 { font-size: 24px; }
+        .subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; margin-top: 8px; }
+
+        .gantt-grid {
+            display: grid;
+            grid-template-columns: 320px repeat(20, minmax(48px, 1fr));
+            border: 1px solid var(--bg-grid);
+            border-radius: 6px;
+            background: repeating-linear-gradient(to right, transparent, transparent 320px, var(--bg-grid) 320px, var(--bg-grid) 321px);
+        }
+
+        .cell-header-main, .cell-header-month, .cell-header-week {
+            background-color: #0d153a;
+            text-align: center;
+            align-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--bg-grid);
+            border-right: 1px solid var(--bg-grid);
+            padding: 8px 2px;
+        }
+
+        .cell-header-main { grid-row: span 3; font-size: 14px; background-color: #090e29; }
+        .week-dates { font-size: 9px; color: var(--text-muted); display: block; margin-top: 2px; }
+
+        .activity-name {
+            background-color: #0b112c;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            border-bottom: 1px solid var(--bg-grid);
+            border-right: 1px solid var(--bg-grid);
+            display: flex;
+            align-items: center;
+        }
+
+        .bar-container {
+            border-bottom: 1px solid var(--bg-grid);
+            border-right: 1px solid var(--bg-grid);
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            background-color: rgba(18, 24, 51, 0.3);
+        }
+
+        .bar { height: 26px; width: 100%; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .bg-completed { background-color: var(--col-completed); }
+        .bg-current { background-color: var(--col-current); animation: pulse 2s infinite alternate; }
+        .bg-next { background-color: var(--col-next); }
+        .bg-final { background-color: var(--col-final); }
+        .bg-sustentacion { background-color: var(--col-sustentacion); }
+
+        @keyframes pulse {
+            from { box-shadow: 0 0 4px var(--col-current); }
+            to { box-shadow: 0 0 14px var(--col-current); }
+        }
+
+        .s10-highlight { background-color: rgba(255, 59, 48, 0.15) !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Cronograma de Tesis RAG</h1>
+    <div class="subtitle">Plan de Trabajo Optimizado — Estado Real al 16 de Septiembre de 2026</div>
+
+    <div class="gantt-grid">
+        <div class="cell-header-main">Actividad</div>
+        <div class="cell-header-month" style="grid-column: span 3;">Julio</div>
+        <div class="cell-header-month" style="grid-column: span 5;">Agosto</div>
+        <div class="cell-header-month" style="grid-column: span 4;">Septiembre</div>
+        <div class="cell-header-month" style="grid-column: span 4;">Octubre</div>
+        <div class="cell-header-month" style="grid-column: span 4;">Noviembre</div>
+
+        <div class="cell-header-week">S1</div><div class="cell-header-week">S2</div><div class="cell-header-week">S3</div>
+        <div class="cell-header-week">S4</div><div class="cell-header-week">S5</div><div class="cell-header-week">S6</div><div class="cell-header-week">S7</div><div class="cell-header-week">S8</div>
+        <div class="cell-header-week">S9</div><div class="cell-header-week s10-highlight" style="color: #ff3b30;">S10</div><div class="cell-header-week">S11</div><div class="cell-header-week">S12</div>
+        <div class="cell-header-week">S13</div><div class="cell-header-week">S14</div><div class="cell-header-week">S15</div><div class="cell-header-week">S16</div>
+        <div class="cell-header-week">S17</div><div class="cell-header-week">S18</div><div class="cell-header-week">S19</div><div class="cell-header-week">S20</div>
+
+        <div class="cell-header-week"><span class="week-dates">15-19 Jul</span></div>
+        <div class="cell-header-week"><span class="week-dates">20-26 Jul</span></div>
+        <div class="cell-header-week"><span class="week-dates">27 Jul-2 Ago</span></div>
+        <div class="cell-header-week"><span class="week-dates">3-9 Ago</span></div>
+        <div class="cell-header-week"><span class="week-dates">10-16 Ago</span></div>
+        <div class="cell-header-week"><span class="week-dates">17-23 Ago</span></div>
+        <div class="cell-header-week"><span class="week-dates">24-30 Ago</span></div>
+        <div class="cell-header-week"><span class="week-dates">31 Ago-6 Sep</span></div>
+        <div class="cell-header-week"><span class="week-dates">7-13 Sep</span></div>
+        <div class="cell-header-week s10-highlight" style="color:#ff3b30; font-weight: bold;"><span class="week-dates">14-20 Sep</span></div>
+        <div class="cell-header-week"><span class="week-dates">21-27 Sep</span></div>
+        <div class="cell-header-week"><span class="week-dates">28 Sep-4 Oct</span></div>
+        <div class="cell-header-week"><span class="week-dates">5-11 Oct</span></div>
+        <div class="cell-header-week"><span class="week-dates">12-18 Oct</span></div>
+        <div class="cell-header-week"><span class="week-dates">19-25 Oct</span></div>
+        <div class="cell-header-week"><span class="week-dates">26 Oct-1 Nov</span></div>
+        <div class="cell-header-week"><span class="week-dates">2-8 Nov</span></div>
+        <div class="cell-header-week"><span class="week-dates">9-15 Nov</span></div>
+        <div class="cell-header-week"><span class="week-dates">16-22 Nov</span></div>
+        <div class="cell-header-week"><span class="week-dates">23-30 Nov</span></div>
+
+        <div class="activity-name">Revisión del estado del arte y definición del problema</div>
+        <div class="bar-container" style="grid-column: span 3;"><div class="bar bg-completed"></div></div>
+        <div class="bar-container" style="grid-column: span 17;"></div>
+
+        <div class="activity-name">Diseño del dataset sintético empresarial</div>
+        <div class="bar-container" style="grid-column: span 3;"></div>
+        <div class="bar-container" style="grid-column: span 3;"><div class="bar bg-completed"></div></div>
+        <div class="bar-container" style="grid-column: span 14;"></div>
+
+        <div class="activity-name">Generación y organización de documentos empresariales</div>
+        <div class="bar-container" style="grid-column: span 4;"></div>
+        <div class="bar-container" style="grid-column: span 4;"><div class="bar bg-completed"></div></div>
+        <div class="bar-container" style="grid-column: span 12;"></div>
+
+        <div class="activity-name">Implementación arquitectura RAG (chunking, embeddings, FAISS, retrieval)</div>
+        <div class="bar-container" style="grid-column: span 8;"></div>
+        <div class="bar-container" style="grid-column: span 1;"><div class="bar bg-completed"></div></div>
+        <div class="bar-container" style="grid-column: span 11;"></div>
+
+        <div class="activity-name">Configuración comparación LLM vs LLM + RAG</div>
+        <div class="bar-container" style="grid-column: span 9;"></div>
+        <div class="bar-container " style="grid-column: span 1;"><div class="bar bg-completed"></div></div>
+        <div class="bar-container" style="grid-column: span 10;"></div>
+
+        <div class="activity-name" style="color: #ff3b30; font-weight: bold;">Ejecución de pruebas, evaluación y optimización 🚀</div>
+        <div class="bar-container" style="grid-column: span 9;"></div>
+        <div class="bar-container s10-highlight" style="grid-column: span 1;"><div class="bar bg-current"></div></div>
+        <div class="bar-container" style="grid-column: span 10;"></div>
+
+        <div class="activity-name">Análisis de resultados</div>
+        <div class="bar-container" style="grid-column: span 10;"></div>
+        <div class="bar-container" style="grid-column: span 1;"><div class="bar bg-next"></div></div>
+        <div class="bar-container" style="grid-column: span 9;"></div>
+
+        <div class="activity-name">Redacción final, correcciones y preparación de sustentación</div>
+        <div class="bar-container" style="grid-column: span 12;"></div>
+        <div class="bar-container" style="grid-column: span 3;"><div class="bar bg-final"></div></div>
+        <div class="bar-container" style="grid-column: span 5;"></div>
+
+        <div class="activity-name">Sustentación de Tesis 🎓</div>
+        <div class="bar-container" style="grid-column: span 16;"></div>
+        <div class="bar-container" style="grid-column: span 4;"><div class="bar bg-sustentacion"></div></div>
+    </div>
+</div>
+
+</body>
+</html>

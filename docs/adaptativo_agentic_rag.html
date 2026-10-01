@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura Adaptive Agentic RAG — agentic-rag</title>
+    <style>
+        :root {
+            --bg-primary: #0a0f24;
+            --bg-surface: #121833;
+            --border-tech: #1a234a;
+            --text-main: #ffffff;
+            --text-muted: #8fa0dd;
+            
+            /* Colores del Flujo Adaptativo */
+            --accent-input: #00f2fe;      /* Entrada y Contexto */
+            --accent-coordinator: #9b5de5;/* Agente Coordinador (Cerebro) */
+            --accent-workers: #ff9500;    /* Analista y Evidencia */
+            --accent-success: #4cd964;    /* Salida Eficiente */
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            border: 1px solid var(--border-tech);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px dashed var(--border-tech);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 26px;
+            letter-spacing: 0.5px;
+        }
+
+        .repo-badge {
+            display: inline-block;
+            background: #0d153a;
+            color: var(--accent-input);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-family: monospace;
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            margin-top: 8px;
+        }
+
+        .architecture-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+        }
+
+        /* Bloques de Etapas */
+        .stage-block {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            background: rgba(13, 21, 58, 0.4);
+            border: 1px solid var(--border-tech);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .stage-block:hover {
+            transform: translateY(-2px);
+            border-color: rgba(155, 93, 229, 0.3);
+        }
+
+        .stage-header {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border-right: 1px solid var(--border-tech);
+            position: relative;
+        }
+
+        .stage-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .stage-body {
+            padding: 20px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* Componentes / Cajas Internas */
+        .component-card {
+            background: #090e29;
+            border: 1px solid var(--border-tech);
+            border-radius: 6px;
+            padding: 12px 16px;
+            min-width: 150px;
+            font-size: 13px;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .component-card .title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .component-card .details {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Flechas de Flujo */
+        .flow-arrow {
+            text-align: center;
+            color: var(--border-tech);
+            font-size: 20px;
+            user-select: none;
+        }
+
+        /* Variaciones por Capas de Agentes */
+        .layer-input .stage-header::before { background-color: var(--accent-input); }
+        .layer-input .stage-header { color: var(--accent-input); }
+        
+        .layer-coordinator .stage-header::before { background-color: var(--accent-coordinator); }
+        .layer-coordinator .stage-header { color: var(--accent-coordinator); }
+        
+        .layer-workers .stage-header::before { background-color: var(--accent-workers); }
+        .layer-workers .stage-header { color: var(--accent-workers); }
+        
+        .layer-success .stage-header::before { background-color: var(--accent-success); }
+        .layer-success .stage-header { color: var(--accent-success); }
+
+        /* Estilo especial para Decisiones Dinámicas */
+        .dynamic-card {
+            border: 1px dashed var(--accent-coordinator);
+            background: rgba(155, 93, 229, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Adaptive Agentic RAG — Orquestación Dinámica</h1>
+        <div class="repo-badge">pepealania/agentic-rag/src/adaptive_agent.py</div>
+    </header>
+
+    <div class="architecture-flow">
+        
+        <!-- PASO 1: ENTRADA Y CONTEXTO -->
+        <div class="stage-block layer-input">
+            <div class="stage-header">1. Entrada e Índice</div>
+            <div class="stage-body">
+                <div class="component-card">
+                    <div class="title">❓ Consulta Usuario</div>
+                    <div class="details">Dataset de Evaluación (Q01-Q24)</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="component-card">
+                    <div class="title">🔍 FAISS Retrieval</div>
+                    <div class="details">k=5 Chunks Base Recuperados</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <!-- PASO 2: AGENTE COORDINADOR -->
+        <div class="stage-block layer-coordinator">
+            <div class="stage-header">2. Capa de Enrutamiento</div>
+            <div class="stage-body">
+                <div class="component-card dynamic-card" style="border-color: var(--accent-coordinator);">
+                    <div class="title">🔮 CoordinatorAgent</div>
+                    <div class="details">Evaluador de Intención y Complejidad</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="component-card">
+                    <div class="title">🔀 Ruteo Adaptativo</div>
+                    <div class="details">Elige: Fast-Track o Validación Completa</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <!-- PASO 3: TRABAJADORES Y AJUSTES DINÁMICOS -->
+        <div class="stage-block layer-workers">
+            <div class="stage-header">3. Ejecución de Sub-Agentes</div>
+            <div class="stage-body">
+                <div class="component-card">
+                    <div class="title">🧠 AnalystAgent</div>
+                    <div class="details">Redacción y Síntesis de Respuestas</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="component-card">
+                    <div class="title">🔍 EvidenceAgent</div>
+                    <div class="details">Verificación Selectiva de Citas</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="component-card">
+                    <div class="title">⚖️ AnswerValidator</div>
+                    <div class="details">Reintentos Inteligentes (max_retries)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <!-- PASO 4: SALIDA OPTIMIZADA -->
+        <div class="stage-block layer-success">
+            <div class="stage-header">4. Respuesta Certificada</div>
+            <div class="stage-body">
+                <div class="component-card" style="border-color: var(--accent-success);">
+                    <div class="title">⚡ Salida Optimizada</div>
+                    <div class="details">Menor Latencia Promedio (1.5636s)</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="component-card">
+                    <div class="title">📉 Ahorro de Recursos</div>
+                    <div class="details">Llamadas Reducidas a 3.33 tokens/query</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="component-card">
+                    <div class="title">🛡️ Groundedness Sólido</div>
+                    <div class="details">Preserva alta calidad (0.9031)</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

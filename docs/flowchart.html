@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Flujo - Adaptive Agentic RAG</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            color: #2d3748;
+            background-color: #f7fafc;
+            margin: 0;
+            padding: 24px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        h2 {
+            margin-top: 0;
+            color: #1a202c;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 12px;
+            text-align: center;
+        }
+        .hypothesis-box {
+            background-color: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 32px;
+        }
+        
+        /* Estructura del Diagrama de Flujo */
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+        }
+        
+        /* Conectores / Flechas */
+        .arrow {
+            width: 2px;
+            height: 24px;
+            background-color: #cbd5e0;
+            position: relative;
+        }
+        .arrow::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: -4px;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid #cbd5e0;
+        }
+
+        /* Formas del Diagrama */
+        .node {
+            padding: 14px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+            max-width: 280px;
+        }
+        
+        .start-end {
+            background-color: #2d3748;
+            color: #ffffff;
+            border-radius: 24px;
+            border: 2px solid #1a202c;
+        }
+        
+        .process {
+            background-color: #edf2f7;
+            color: #2d3748;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+        }
+        
+        .condition {
+            background-color: #feebc8;
+            color: #7b341e;
+            border: 2px solid #fbd38d;
+            transform: rotate(0deg);
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .optimization {
+            background-color: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #38a169;
+            border-radius: 6px;
+        }
+
+        /* Ramificaciones Complejas */
+        .branch-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 600px;
+            gap: 32px;
+            margin: 8px 0;
+        }
+        .branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            border-top: 2px dashed #cbd5e0;
+            padding-top: 16px;
+            position: relative;
+        }
+        .branch-label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+        
+        /* Retorno del Loop Guard */
+        .loop-back-text {
+            font-size: 0.8rem;
+            color: #e53e3e;
+            font-weight: bold;
+            border: 1px dashed #e53e3e;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🔄 Control Adaptativo: Adaptive Agentic RAG</h2>
+    
+    <div class="hypothesis-box">
+        <strong>Estrategia de Optimización:</strong> Reducción de latencia end-to-end mediante el uso de <strong>Validación Determinista</strong> con <strong>Terminación Temprana (Early Exit)</strong> y protección contra ciclos infinitos por medio de un <strong>Loop Guard</strong>.
+    </div>
+
+    <div class="flowchart">
+        <!-- Inicio -->
+        <div class="node start-end">Inicio: Consulta del Usuario</div>
+        <div class="arrow"></div>
+        
+        <!-- Inicialización -->
+        <div class="node process">Inicializar Loop Guard<br><small>(Contador de Iteraciones = 0)</small></div>
+        <div class="arrow"></div>
+        
+        <!-- Ciclo RAG -->
+        <div class="node process">
+            <strong>Fase de Ejecución</strong><br>
+            • T_planning (AnalystAgent)<br>
+            • T_retrieval (EvidenceAgent)<br>
+            • T_LLM (Respuesta Base)
+        </div>
+        <div class="arrow"></div>
+        
+        <!-- Incremento -->
+        <div class="node process">Incrementar Contador:<br>Iteraciones +1</div>
+        <div class="arrow"></div>
+        
+        <!-- Evaluación Determinista -->
+        <div class="node condition">¿Pasa Validación Determinista?</div>
+        
+        <!-- Bifurcación de la Validación -->
+        <div class="branch-container">
+            <!-- Rama SÍ: Early Exit -->
+            <div class="branch">
+                <div class="branch-label" style="color: #38a169;">SÍ</div>
+                <div class="node optimization">⚡ EARLY EXIT<br>Terminación Temprana Activada</div>
+                <div class="arrow"></div>
+                <div class="node start-end">Fin: Respuesta Óptima</div>
+            </div>
+            
+            <!-- Rama NO: Loop Guard -->
+            <div class="branch">
+                <div class="branch-label" style="color: #e53e3e;">NO</div>
+                <div class="node condition">¿Iteraciones >= Max_Steps?</div>
+                
+                <div class="branch-container" style="margin-top: 12px;">
+                    <!-- Max Steps SÍ -->
+                    <div class="branch">
+                        <div class="branch-label">SÍ</div>
+                        <div class="node optimization">⚠️ FORZAR SALIDA<br>Compilar mejor respuesta actual</div>
+                        <div class="arrow"></div>
+                        <div class="node start-end">Fin: Respuesta Salvada</div>
+                    </div>
+                    
+                    <!-- Max Steps NO: Reiniciar Ciclo -->
+                    <div class="branch">
+                        <div class="branch-label">NO</div>
+                        <div class="loop-back-text">🔄 Re-planificar</div>
+                        <div class="node process" style="font-size: 0.8rem; padding: 8px;">Volver a Fase de Ejecución</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura Deterministic Agentic RAG — agentic-rag</title>
+    <style>
+        :root {
+            --bg-primary: #0a0f24;
+            --bg-surface: #121833;
+            --border-tech: #1a234a;
+            --text-main: #ffffff;
+            --text-muted: #8fa0dd;
+            
+            /* Colores del Flujo Agéntico */
+            --accent-input: #00f2fe;    /* Entrada y Recuperación */
+            --accent-analyst: #ff9500;  /* Agente Analista */
+            --accent-validator: #ff3b30;/* Bucle de Validación */
+            --accent-success: #4cd964;  /* Salida Certificada */
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            border: 1px solid var(--border-tech);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px dashed var(--border-tech);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 26px;
+            letter-spacing: 0.5px;
+        }
+
+        .repo-badge {
+            display: inline-block;
+            background: #0d153a;
+            color: var(--accent-input);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-family: monospace;
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            margin-top: 8px;
+        }
+
+        .architecture-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+        }
+
+        /* Bloques de Etapas */
+        .stage-block {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            background: rgba(13, 21, 58, 0.4);
+            border: 1px solid var(--border-tech);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .stage-block:hover {
+            transform: translateY(-2px);
+            border-color: rgba(29, 99, 255, 0.3);
+        }
+
+        .stage-header {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border-right: 1px solid var(--border-tech);
+            position: relative;
+        }
+
+        .stage-header::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .stage-body {
+            padding: 20px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* Componentes / Cajas Internas */
+        .component-card {
+            background: #090e29;
+            border: 1px solid var(--border-tech);
+            border-radius: 6px;
+            padding: 12px 16px;
+            min-width: 150px;
+            font-size: 13px;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .component-card .title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .component-card .details {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Flechas de Flujo */
+        .flow-arrow {
+            text-align: center;
+            color: var(--border-tech);
+            font-size: 20px;
+            user-select: none;
+        }
+
+        /* Variaciones por Capas de Agentes */
+        .layer-input .stage-header::before { background-color: var(--accent-input); }
+        .layer-input .stage-header { color: var(--accent-input); }
+        
+        .layer-analyst .stage-header::before { background-color: var(--accent-analyst); }
+        .layer-analyst .stage-header { color: var(--accent-analyst); }
+        
+        .layer-validator .stage-header::before { background-color: var(--accent-validator); }
+        .layer-validator .stage-header { color: var(--accent-validator); }
+        
+        .layer-success .stage-header::before { background-color: var(--accent-success); }
+        .layer-success .stage-header { color: var(--accent-success); }
+
+        /* Estilo especial para Bucles/Loops Interactivos */
+        .loop-card {
+            border: 1px dashed var(--accent-validator);
+            background: rgba(255, 59, 48, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Deterministic Agentic RAG — Arquitectura Multi-Agente</h1>
+        <div class="repo-badge">pepealania/agentic-rag/src/deterministic_agent.py</div>
+    </header>
+
+    <div class="architecture-flow">
+        
+        <!-- PASO 1: ENTRADA Y CONTEXTO -->
+        <div class="stage-block layer-input">
+            <div class="stage-header">1. Entrada e Índice</div>
+            <div class="stage-body">
+                <div class="component-card">
+                    <div class="title">❓ Consulta Usuario</div>
+                    <div class="details">Dataset Evaluado (Q01-Q24)</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="component-card">
+                    <div class="title">🔍 FAISS Retrieval</div>
+                    <div class="details">Recupera k=5 Chunks Básicos</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <!-- PASO 2: AGENTE ANALISTA -->
+        <div class="stage-block layer-analyst">
+            <div class="stage-header">2. Capa de Análisis</div>
+            <div class="stage-body">
+                <div class="component-card" style="border-color: var(--accent-analyst);">
+                    <div class="title">🧠 AnalystAgent</div>
+                    <div class="details">Orquestador Secuencial Fijo</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="component-card">
+                    <div class="title">📝 Síntesis Inicial</div>
+                    <div class="details">Genera Respuesta Borrador</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <!-- PASO 3: BUCLE DETERMINISTA DE VALIDACIÓN -->
+        <div class="stage-block layer-validator">
+            <div class="stage-header">3. Bucle de Validación</div>
+            <div class="stage-body">
+                <div class="component-card">
+                    <div class="title">🔍 EvidenceAgent</div>
+                    <div class="details">Extracción Estricta de Citas</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="component-card loop-card">
+                    <div class="title">⚖️ AnswerValidator</div>
+                    <div class="details">Validación Cruzada (Hechos vs Citas)</div>
+                </div>
+                <div class="flow-arrow">⇄</div>
+                <div class="component-card">
+                    <div class="title">🔄 Reintentos Fijos</div>
+                    <div class="details">Soporta max_steps (Sube Llamadas a 6)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <!-- PASO 4: SALIDA CERTIFICADA -->
+        <div class="stage-block layer-success">
+            <div class="stage-header">4. Respuesta Final</div>
+            <div class="stage-body">
+                <div class="component-card" style="border-color: var(--accent-success);">
+                    <div class="title">🛡️ Output Con Citas</div>
+                    <div class="details">Groundedness Certificado (0.9068)</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="component-card">
+                    <div class="title">📊 Registro Métricas</div>
+                    <div class="details">Citas Válidas = 1.0 (Perfecto)</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

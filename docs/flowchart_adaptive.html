@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Flujo — Adaptive Agentic RAG</title>
+    <style>
+        :root {
+            --bg-primary: #0a0f24;
+            --bg-surface: #121833;
+            --border-tech: #1a234a;
+            --text-main: #ffffff;
+            --text-muted: #8fa0dd;
+            
+            /* Colores del Flujo Lógico */
+            --accent-start: #00f2fe;      /* Inicio / Entrada */
+            --accent-brain: #9b5de5;      /* Coordinator (Decisión) */
+            --accent-worker: #ff9500;     /* Procesamiento / Agentes */
+            --accent-fail: #ff3b30;       /* Rechazo / Reintento */
+            --accent-success: #4cd964;    /* Salida Exitosa */
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            border: 1px solid var(--border-tech);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px dashed var(--border-tech);
+            padding-bottom: 20px;
+        }
+
+        h1 { margin: 0 0 8px 0; font-size: 24px; }
+        .subtitle { color: var(--text-muted); font-size: 13px; margin: 0; }
+
+        /* Estructura del Diagrama Vertical */
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Nodos Base */
+        .flow-node {
+            background: #090e29;
+            border: 1px solid var(--border-tech);
+            border-radius: 6px;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 13px;
+            min-width: 240px;
+            max-width: 320px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .node-title { font-weight: 700; margin-bottom: 2px; }
+        .node-desc { font-size: 11px; color: var(--text-muted); }
+
+        /* Nodo de Decisión (Rombo Estilizado) */
+        .decision-node {
+            border: 1px solid var(--accent-brain);
+            background: rgba(155, 93, 229, 0.05);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .decision-node .node-title { color: var(--accent-brain); }
+
+        /* Flechas y Conectores */
+        .arrow {
+            font-size: 20px;
+            color: var(--border-tech);
+            user-select: none;
+            line-height: 1;
+        }
+
+        .branch-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+            gap: 40px;
+            margin: 10px 0;
+        }
+
+        .branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            border: 1px dashed rgba(26, 35, 74, 0.5);
+            padding: 16px;
+            border-radius: 8px;
+            background: rgba(13, 21, 58, 0.1);
+        }
+
+        .branch-label {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: -4px;
+        }
+        .label-fast { background: rgba(76, 217, 100, 0.15); color: var(--accent-success); }
+        .label-complex { background: rgba(255, 149, 0, 0.15); color: var(--accent-worker); }
+
+        /* Colores Bordes de Nodos */
+        .border-start { border-left: 4px solid var(--accent-start); }
+        .border-worker { border-left: 4px solid var(--accent-worker); }
+        .border-fail { border-left: 4px solid var(--accent-fail); }
+        .border-success { border-left: 4px solid var(--accent-success); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Diagrama de Flujo: Adaptive Agentic RAG</h1>
+        <p class="subtitle">Lógica Algorítmica del CoordinatorAgent y Enrutamiento Dinámico de Consultas</p>
+    </header>
+
+    <div class="flowchart">
+        
+        <!-- INICIO -->
+        <div class="flow-node border-start">
+            <div class="node-title">🏁 Inicio: Consulta de Usuario</div>
+            <div class="node-desc">Entrada del Dataset de Evaluación (Q01-Q24)</div>
+        </div>
+
+        <div class="arrow">↓</div>
+
+        <!-- RECUPERACIÓN -->
+        <div class="flow-node border-start">
+            <div class="node-title">🔍 Recuperación de Contexto</div>
+            <div class="node-desc">Extracción de k=5 Chunks desde el Índice FAISS</div>
+        </div>
+
+        <div class="arrow">↓</div>
+
+        <!-- DECISIÓN DEL COORDINADOR -->
+        <div class="flow-node decision-node">
+            <div class="node-title">🔮 CoordinatorAgent</div>
+            <div class="node-desc">¿La consulta requiere validación estricta o permite flujo rápido?</div>
+        </div>
+
+        <!-- BIFURCACIÓN DE CAMINOS -->
+        <div class="branch-container">
+            
+            <!-- CAMINO IZQUIERDO: FAST TRACK -->
+            <div class="branch">
+                <div class="branch-label label-fast">Ruta 1: Fast-Track</div>
+                <div class="arrow">👇</div>
+                <div class="flow-node border-success">
+                    <div class="node-title">🧠 AnalystAgent</div>
+                    <div class="node-desc">Generación directa de la respuesta usando el contexto FAISS sin reintentos.</div>
+                </div>
+            </div>
+
+            <!-- CAMINO DERECHO: VALIDACIÓN COMPLETA -->
+            <div class="branch">
+                <div class="branch-label label-complex">Ruta 2: Validación Avanzada</div>
+                <div class="arrow">👇</div>
+                <div class="flow-node border-worker">
+                    <div class="node-title">🧠 AnalystAgent</div>
+                    <div class="node-desc">Redacción del borrador inicial estructurado.</div>
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-node border-worker">
+                    <div class="node-title">🔍 EvidenceAgent + AnswerValidator</div>
+                    <div class="node-desc">Extracción de citas y contraste analítico de hechos.</div>
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-node border-fail" style="border: 1px dashed var(--accent-fail); background: rgba(255,59,48,0.02);">
+                    <div class="node-title">🔄 ¿Alucinación detectada?</div>
+                    <div class="node-desc">Bucle de autocorrección dinámico limitado por <em>max_retries</em>.</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="arrow">↓</div>
+
+        <!-- CONVERGENCIA / SALIDA -->
+        <div class="flow-node border-success" style="background: rgba(76, 217, 100, 0.03); border-color: var(--accent-success);">
+            <div class="node-title">🛡️ Consolidación de Respuesta Final</div>
+            <div class="node-desc">Estructuración del archivo de salida con metadatos y citas válidas.</div>
+        </div>
+
+        <div class="arrow">↓</div>
+
+        <!-- FIN -->
+        <div class="flow-node border-success" style="border-radius: 20px; font-weight: bold; min-width: 120px; max-width: 150px;">
+            🏁 Fin del Pipeline<br>
+            <span style="font-size: 10px; font-weight: normal; color: var(--accent-success);">Latencia: 1.56s | Calls: 3.33</span>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

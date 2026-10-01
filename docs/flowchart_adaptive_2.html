@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Flujo Real: Adaptive Agentic RAG</title>
+    <style>
+        :root {
+            --bg-primary: #0a0f24;
+            --bg-surface: #121833;
+            --border-tech: #1a234a;
+            --text-main: #ffffff;
+            --text-muted: #8fa0dd;
+            
+            /* Colores de la Topología Hub-and-Spoke */
+            --accent-hub: #a855f7;       /* Coordinator Central */
+            --accent-retrieve: #00f2fe;  /* Recuperación de Contexto */
+            --accent-analyst: #ff9500;   /* Síntesis de Respuesta */
+            --accent-validator: #ff3b30; /* Validación Factual */
+            --accent-success: #4cd964;   /* Finalización Segura */
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            border: 1px solid var(--border-tech);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px dashed var(--border-tech);
+            padding-bottom: 20px;
+        }
+
+        h1 { margin: 0 0 8px 0; font-size: 24px; letter-spacing: 0.5px; }
+        p { color: var(--text-muted); font-size: 14px; margin: 0; }
+
+        .flow-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Bloques de Estado y Nodos */
+        .flow-node {
+            background: #090e29;
+            border: 1px solid var(--border-tech);
+            border-radius: 8px;
+            padding: 16px 20px;
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .node-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .node-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+        .arrow-down { color: var(--text-muted); font-size: 20px; user-select: none; margin: 2px 0; }
+
+        /* Estilos de Especialización por Nodo */
+        .hub-central { border: 2px solid var(--accent-hub); background: rgba(168, 85, 247, 0.03); }
+        .hub-central .node-title { color: var(--accent-hub); }
+
+        /* Contenedor de Sub-Agentes Bajo Demanda */
+        .agents-star-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .agent-spoke {
+            background: #090e29;
+            border: 1px solid var(--border-tech);
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .agent-spoke .title { font-weight: 600; margin-bottom: 4px; }
+        .agent-spoke .badge { background: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin-top: 6px; font-family: monospace; }
+
+        /* Bloque de Resets Activos */
+        .reset-box {
+            border: 1px dashed var(--accent-validator);
+            background: rgba(255, 59, 48, 0.02);
+            width: 80%;
+            max-width: 600px;
+            padding: 14px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .reset-box .title { font-weight: bold; color: var(--accent-validator); margin-bottom: 4px; }
+
+        .badge-route { background: #1e1b4b; color: #c084fc; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Diagrama de Flujo Algorítmico: Adaptive Agentic RAG</h1>
+        <p>Topología Estrella (Hub-and-Spoke): Orquestación Dinámica Paso a Paso guiada por el Estado</p>
+    </header>
+
+    <div class="flow-wrapper">
+        
+        <!-- ENTRADA -->
+        <div class="flow-node">
+            <div class="node-title">🏁 Inicio: Consulta de Usuario</div>
+            <div class="node-desc">Entrada del Dataset de Evaluación (Q01-Q24). Se inicializan los contadores de control globales en el AgentState.</div>
+        </div>
+
+        <div class="arrow-down">↓</div>
+
+        <!-- EL HUB CENTRAL QUE EVALÚA PASO A PASO -->
+        <div class="flow-node hub-central">
+            <div class="node-title">🧠 Nodo Central: adaptive_router</div>
+            <div class="node-desc">El método <b>self.coordinator.decide(state)</b> inspecciona las banderas de control en cada iteración y asigna la acción dinámica del paso actual.</div>
+        </div>
+
+        <div class="arrow-down">↕ (Enrutamiento Condicional por Estado)</div>
+
+        <!-- SUB-AGENTES ACTIVADOS BAJO DEMANDA -->
+        <div class="agents-star-container">
+            <div class="agent-spoke" style="border-color: var(--accent-retrieve);">
+                <div class="title" style="color: var(--accent-retrieve);">🔍 1. retrieve</div>
+                <div class="node-desc">Ejecuta EvidenceAgent.run(). Extrae k=5 chunks e inicializa la variable de control <b>evidence_sufficient</b>.</div>
+                <span class="badge">↩️ Retorna al Hub</span>
+            </div>
+            
+            <div class="agent-spoke" style="border-color: var(--accent-analyst);">
+                <div class="title" style="color: var(--accent-analyst);">📝 2. analyze</div>
+                <div class="node-desc">Ejecuta AnalystAgent.run(). Sostiene la generación del borrador de la respuesta utilizando la evidencia disponible.</div>
+                <span class="badge">↩️ Retorna al Hub</span>
+            </div>
+            
+            <div class="agent-spoke" style="border-color: var(--accent-validator);">
+                <div class="title" style="color: var(--accent-validator);">⚖️ 3. validate</div>
+                <div class="node-desc">Ejecuta AnswerValidator.run(). Realiza la validación cruzada y define las banderas <b>validation_passed</b> y <b>answer_sufficient</b>.</div>
+                <span class="badge">↩️ Retorna al Hub</span>
+            </div>
+        </div>
+
+        <div class="arrow-down">↓ (Si el Coordinador detecta Fallas Factuales)</div>
+
+        <!-- NODOS DE REINTENTO REAL CON RESET DE MEMORIA -->
+        <div class="reset-box">
+            <div class="title">🔄 Nodos Activos de Reintento: retry_analysis / retry_retrieval</div>
+            <div class="node-desc">
+                No es un bucle pasivo. El nodo altera físicamente el estado limpiando el historial previo: 
+                <span style="color: #f97316; font-family: monospace; font-size: 11px;"><br>validation_errors = [] | validation_passed = False</span>
+                e incrementa el contador de control hacia el límite seguro.
+            </div>
+            <div class="arrow-connector" style="margin-top: 8px; color: var(--accent-retrieve);">➔ Forzaría re-ejecución directa hacia el sub-agente asignado</div>
+        </div>
+
+        <div class="arrow-down">↓ (Si el Coordinador valida Suficiencia o agota el presupuesto max_steps)</div>
+
+        <!-- FINALIZACIÓN -->
+        <div class="flow-node" style="border-color: var(--accent-success);">
+            <div class="node-title" style="color: var(--accent-success);">🎯 Nodo: finalize ➔ END</div>
+            <div class="node-desc">Consolida la telemetría recolectada paso a paso (conteo de intentos de cada agente), la escribe en el <b>decision_log</b> histórico y cierra el ciclo de vida del grafo de forma segura.</div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

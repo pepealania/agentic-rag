@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparativa Evolutiva de Arquitecturas RAG</title>
+    <style>
+        :root {
+            --bg-primary: #0a0f24;
+            --bg-surface: #121833;
+            --border-tech: #1a234a;
+            --text-main: #ffffff;
+            --text-muted: #8fa0dd;
+            
+            /* Colores de las 3 Arquitecturas */
+            --color-classic: #00f2fe;
+            --color-deterministic: #ff9500;
+            --color-adaptive: #a855f7;
+            
+            --color-error: #ff3b30;
+            --color-success: #4cd964;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1300px;
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            border: 1px solid var(--border-tech);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px dashed var(--border-tech);
+            padding-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0 0 8px 0;
+            font-size: 26px;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* Rejilla de 3 Columnas */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+        }
+
+        .column-rag {
+            background: rgba(13, 21, 58, 0.2);
+            border: 1px solid var(--border-tech);
+            border-radius: 8px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column-title {
+            font-size: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border-tech);
+        }
+
+        .col-classic .column-title { color: var(--color-classic); border-color: var(--color-classic); }
+        .col-deterministic .column-title { color: var(--color-deterministic); border-color: var(--color-deterministic); }
+        .col-adaptive .column-title { color: var(--color-adaptive); border-color: var(--color-adaptive); }
+
+        /* Estructura de Pasos */
+        .step-box {
+            background: rgba(9, 14, 41, 0.6);
+            border: 1px solid var(--border-tech);
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .step-num {
+            font-size: 10px;
+            font-family: monospace;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .step-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .step-desc {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Etiquetas Flotantes Técnicas */
+        .tag-tech {
+            position: absolute;
+            top: -10px;
+            right: 12px;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-analyst { background: #451a03; color: #f97316; border: 1px solid var(--color-deterministic); }
+        .tag-loop { background: #4c0519; color: #fca5a5; border: 1px solid var(--color-error); }
+        .tag-router { background: #1e1b4b; color: #c084fc; border: 1px solid var(--color-adaptive); }
+
+        /* Bloque de Resultados / Garantías del Diseño */
+        .result-box {
+            margin-top: auto;
+            padding: 16px;
+            border-radius: 6px;
+            background: #090e29;
+            border: 1px solid var(--border-tech);
+        }
+
+        .result-status {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .result-metrics {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Comparativa Evolutiva de Arquitecturas RAG</h1>
+        <p>Estructura Interna Colectiva: Flujo Lineal vs. Validación Secuencial vs. Enrutamiento Adaptativo Dinámico</p>
+    </header>
+
+    <div class="comparison-grid">
+        
+        <!-- COLUMNA 1: CLASSIC BASELINE RAG -->
+        <div class="column-rag col-classic">
+            <div class="column-title">1. Classic Baseline RAG</div>
+            
+            <div class="step-box">
+                <span class="step-num">Paso 01</span>
+                <div class="step-title">🔍 Recuperación Plana</div>
+                <div class="step-desc">Extracción por similitud de coseno en base de datos FAISS local con k=5 Chunks estáticos.</div>
+            </div>
+
+            <div class="step-box">
+                <span class="step-num">Paso 02</span>
+                <div class="step-title">📦 Contexto Crudo</div>
+                <div class="step-desc">Inyección masiva del texto recuperado directamente en la ventana de contexto, sin procesar.</div>
+            </div>
+
+            <div class="step-box">
+                <span class="step-num">Paso 03</span>
+                <div class="step-title">🤖 Inferencia Secuencial</div>
+                <div class="step-desc">Ejecución del modelo gpt-4o-mini en un único paso directo de lectura y escritura.</div>
+            </div>
+
+            <div class="result-box" style="border-color: var(--color-error); background: rgba(255, 59, 48, 0.02);">
+                <div class="result-status" style="color: var(--color-error);">❌ Comportamiento de Lazo Abierto</div>
+                <div class="result-metrics">
+                    Baja latencia teórica por ejecución lineal directa, pero nula protección frente al riesgo de alucinaciones o desvíos contextuales.
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA 2: DETERMINISTIC AGENTIC RAG -->
+        <div class="column-rag col-deterministic">
+            <div class="column-title">2. Deterministic Agentic RAG</div>
+            
+            <div class="step-box">
+                <span class="step-num">Paso 01</span>
+                <div class="step-title">🔍 Recuperación Inicial</div>
+                <div class="step-desc">Idéntica fase de extracción indexada en FAISS (Mismo cuello de botella en Recall@5 para aislar variables).</div>
+            </div>
+
+            <div class="step-box">
+                <span class="tag-tech tag-analyst">Agente Analista</span>
+                <span class="step-num">Paso 02</span>
+                <div class="step-title">🧠 AnalystAgent Estricto</div>
+                <div class="step-desc">El prompt pasa a control del agente para estructurar y modelar la respuesta borrador de manera lógica.</div>
+            </div>
+
+            <div class="step-box">
+                <span class="tag-tech tag-loop">Bucle de Control</span>
+                <span class="step-num">Paso 03</span>
+                <div class="step-title">⚖️ EvidenceAgent + Validator</div>
+                <div class="step-desc">Validación secuencial obligatoria y rígida. Forzado de reintentos continuos a través del estado si existen inconsistencias.</div>
+            </div>
+
+            <div class="result-box" style="border-color: var(--color-deterministic); background: rgba(255, 149, 0, 0.02);">
+                <div class="result-status" style="color: var(--color-deterministic);">🛡️ Garantía Factual Rigurosa</div>
+                <div class="result-metrics">
+                    Salida blindada algorítmicamente contra la alucinación, pagando un impuesto fijo y elevado de latencia por la validación obligatoria en cada consulta.
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA 3: ADAPTIVE AGENTIC RAG (HIPÓTESIS DE MODELADO) -->
+        <div class="column-rag col-adaptive">
+            <div class="column-title">3. Adaptive Agentic RAG</div>
+            
+            <div class="step-box">
+                <span class="step-num">Paso 01</span>
+                <div class="step-title">🔍 Recuperación de Origen</div>
+                <div class="step-desc">Se mantiene la base de recuperación cruzada FAISS para validar el comportamiento del nuevo enrutador bajo el mismo corpus.</div>
+            </div>
+
+            <div class="step-box">
+                <span class="tag-tech tag-router">Orquestador</span>
+                <span class="step-num">Paso 02</span>
+                <div class="step-title">🧠 CoordinatorAgent Activo</div>
+                <div class="step-desc">Un nodo central de orquestación en estrella evalúa de forma dinámica el estado para derivar la consulta.</div>
+            </div>
+
+            <div class="step-box">
+                <span class="tag-tech tag-router">Ruta Inteligente</span>
+                <span class="step-num">Paso 03</span>
+                <div class="step-title">⚡ Fast-Track / Reintentos Elásticos</div>
+                <div class="step-desc">Modelado flexible: permite omitir validaciones costosas en consultas directas o invocar sub-agentes solo ante incertidumbre factual.</div>
+            </div>
+            <div class="result-box" style="border-color: var(--color-success); background: rgba(76, 217, 100, 0.02);">
+                <div class="result-status" style="color: var(--color-success);">💎 Optimización Elástica Esperada</div>
+                <div class="result-metrics">
+                    Hipótesis de diseño: Preservar la robustez factual del modelo agéntico reduciendo sustancialmente el costo computacional promedio mediante rutas dinámicas.
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>			

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparación Arquitectónica: Baseline RAG vs. Deterministic Agentic RAG</title>
+    <style>
+        :root {
+            --bg-primary: #0a0f24;
+            --bg-surface: #121833;
+            --border-tech: #1a234a;
+            --text-main: #ffffff;
+            --text-muted: #8fa0dd;
+            
+            /* Colores de las Arquitecturas */
+            --accent-baseline: #00f2fe;    /* Flujo Lineal */
+            --accent-agentic: #ff9500;     /* Flujo Agéntico */
+            --accent-alert: #ff3b30;       /* Alucinación / Puntos Críticos */
+            --accent-success: #4cd964;     /* Garantía Estructural */
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            border: 1px solid var(--border-tech);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px dashed var(--border-tech);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* Layout del Versus */
+        .vs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-top: 20px;
+        }
+
+        .column-title {
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-tech);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .column-baseline .column-title { color: var(--accent-baseline); border-color: var(--accent-baseline); }
+        .column-agentic .column-title { color: var(--accent-agentic); border-color: var(--accent-agentic); }
+
+        /* Tarjetas de Fases */
+        .phase-card {
+            background: rgba(13, 21, 58, 0.3);
+            border: 1px solid var(--border-tech);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .phase-badge {
+            font-size: 10px;
+            font-family: monospace;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .phase-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .phase-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Indicadores Estructurales Especiales */
+        .tag-deviation {
+            position: absolute;
+            top: -10px;
+            right: 12px;
+            background: #7c2d12;
+            color: #ffedd5;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--accent-agentic);
+            text-transform: uppercase;
+        }
+
+        .tag-loop {
+            position: absolute;
+            top: -10px;
+            right: 12px;
+            background: #4c0519;
+            color: #ffe4e6;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--accent-alert);
+            text-transform: uppercase;
+        }
+
+        .tag-certified {
+            position: absolute;
+            top: -10px;
+            right: 12px;
+            background: #064e3b;
+            color: #d1fae5;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--accent-success);
+            text-transform: uppercase;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            color: var(--border-tech);
+            font-size: 16px;
+            margin-bottom: 20px;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>RAG Pipeline Architectural Comparison</h1>
+        <p class="subtitle">Desviaciones Estructurales: Classic Linear RAG vs. Multi-Agent Validation Loop</p>
+    </header>
+
+    <div class="vs-grid">
+        
+        <!-- COLUMNA IZQUIERDA: CLASSIC BASELINE RAG -->
+        <div class="column-baseline">
+            <div class="column-title">🟦 Classic Baseline RAG (Linear)</div>
+            
+            <div class="phase-card">
+                <span class="phase-badge">Fase 01</span>
+                <div class="phase-title">📂 Recuperación Indexada</div>
+                <div class="phase-desc">Extracción vectorial local directa sobre índice FAISS (k=5 Chunks) sin filtrado previo.</div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="phase-card">
+                <span class="phase-badge">Fase 02</span>
+                <div class="phase-title">📦 Ensamble de Contexto</div>
+                <div class="phase-desc">Concatenación estática de fragmentos crudos dentro del prompt del LLM de manera pasiva.</div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="phase-card" style="border-color: var(--accent-alert);">
+                <span class="phase-badge" style="color: var(--accent-alert);">Fase 03</span>
+                <div class="phase-title" style="color: #fca5a5;">🤖 Inferencia LLM Directa</div>
+                <div class="phase-desc">Ejecución directa del modelo gpt-4o-mini sin análisis ni filtros de veracidad intermedios.</div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="phase-card">
+                <span class="phase-badge">Fase 04</span>
+                <div class="phase-title">💬 Respuesta Plana Obtenida</div>
+                <div class="phase-desc">Salida directa al usuario final. Al carecer de capas de control estructural, es altamente vulnerable a alucinaciones.</div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: DETERMINISTIC AGENTIC RAG -->
+        <div class="column-agentic">
+            <div class="column-title">🟧 Deterministic Agentic RAG (Loop)</div>
+            
+            <div class="phase-card">
+                <span class="phase-badge">Fase 01</span>
+                <div class="phase-title">🔍 Recuperación Inicial</div>
+                <div class="phase-desc">Idéntico paso de extracción de contexto k=5 mediante FAISS Index para garantizar condiciones base homogéneas.</div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="phase-card" style="border-color: var(--accent-agentic);">
+                <span class="tag-deviation">Cambio Estructural</span>
+                <span class="phase-badge" style="color: var(--accent-agentic);">Fase 02</span>
+                <div class="phase-title">🧠 Intervención: AnalystAgent</div>
+                <div class="phase-desc">Un agente especializado asume el control del prompt para procesar, segmentar y consolidar la información estructuradamente.</div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="phase-card" style="border-color: var(--accent-alert);">
+                <span class="tag-loop">Bucle de Validación</span>
+                <span class="phase-badge" style="color: var(--accent-alert);">Fase 03</span>
+                <div class="phase-title" style="color: #fca5a5;">⚖️ Ciclo: EvidenceAgent + AnswerValidator</div>
+                <div class="phase-desc">Extracción rigurosa de fuentes seguida por un proceso iterativo de contrastación. Si se detectan inconsistencias, el flujo se repite deterministamente mediante el estado hasta cumplir max_steps.</div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="phase-card" style="border-color: var(--accent-success);">
+                <span class="tag-certified">Garantía Estructural</span>
+                <span class="phase-badge" style="color: var(--accent-success);">Fase 04</span>
+                <div class="phase-title">🎯 Respuesta Certificada con Citaciones</div>
+                <div class="phase-desc">Salida final blindada algorítmicamente contra la alucinación. El diseño del grafo mitiga la desviación factual asegurando el rastro de citación exacta.</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

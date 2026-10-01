@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Latencia RAG Avanzado</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            color: #2d3748;
+            background-color: #f7fafc;
+            margin: 0;
+            padding: 24px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        .formula-box {
+            background: linear-gradient(135deg, #1a202c, #2d3748);
+            color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.4rem;
+            margin-bottom: 32px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .formula-box span {
+            font-weight: bold;
+        }
+        .t-total { color: #f6e05e; }
+        .t-plan { color: #fc8181; }
+        .t-ret { color: #63b3ed; }
+        .t-llm { color: #68d391; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            background: #fff;
+        }
+        .card h3 {
+            margin-top: 0;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 8px;
+        }
+        .timeline-bar {
+            display: flex;
+            height: 36px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            line-height: 36px;
+        }
+        .p-plan { background-color: #e53e3e; }
+        .p-ret { background-color: #3182ce; }
+        .p-llm { background-color: #38a169; }
+
+        .metric-list {
+            margin-top: 12px;
+            font-size: 0.9rem;
+        }
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .legend-row {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 24px;
+            font-size: 0.9rem;
+        }
+        .legend-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="margin-top:0;">📊 Análisis de Latencia Estructural por Componente</h2>
+    
+    <!-- Cuadro de la Fórmula del Usuario -->
+    <div class="formula-box">
+        <span class="t-total">T_total</span> = <span class="t-plan">T_planning</span> + <span class="t-ret">T_retrieval</span> + <span class="t-llm">T_LLM</span>
+    </div>
+
+    <div class="grid">
+        <!-- Tarjeta Baseline -->
+        <div class="card">
+            <h3 style="color: #3182ce;">Classic Baseline RAG</h3>
+            <p style="font-size:0.9rem; color:#718096;">Ejecución lineal directa. Sin bucles de validación.</p>
+            
+            <div class="timeline-bar">
+                <!-- No tiene Planning -->
+                <div class="p-ret" style="width: 30%;">20% Ret</div>
+                <div class="p-llm" style="width: 70%;">80% LLM</div>
+            </div>
+            
+            <div class="metric-list">
+                <div class="metric-item"><span>⏱️ Promedio T_total:</span> <strong>~1.45s</strong></div>
+                <div class="metric-item"><span>🧠 T_planning:</span> <span style="color:#e53e3e;">0.00s (Inexistente)</span></div>
+                <div class="metric-item"><span>🔍 T_retrieval:</span> <span>~0.30s (1 consulta)</span></div>
+                <div class="metric-item"><span>🤖 T_LLM:</span> <span>~1.15s (1 llamada)</span></div>
+            </div>
+        </div>
+
+        <!-- Tarjeta Agentic -->
+        <div class="card">
+            <h3 style="color: #dd6b20;">Deterministic Agentic RAG</h3>
+            <p style="font-size:0.9rem; color:#718096;">Flujo iterativo guiado por Analyst, Evidence y Validator.</p>
+            
+            <div class="timeline-bar">
+                <div class="p-plan" style="width: 25%;">25% Plan</div>
+                <div class="p-ret" style="width: 20%;">20% Ret</div>
+                <div class="p-llm" style="width: 55%;">55% LLM</div>
+            </div>
+            
+            <div class="metric-list">
+                <div class="metric-item"><span>⏱️ Promedio T_total:</span> <strong>~1.95s</strong></div>
+                <div class="metric-item"><span>🧠 T_planning:</span> <span style="color:#e53e3e;">~0.48s (Multi-agente)</span></div>
+                <div class="metric-item"><span>🔍 T_retrieval:</span> <span>~0.39s (Consultas extra)</span></div>
+                <div class="metric-item"><span>🤖 T_LLM:</span> <span>~1.08s (N llamadas cortas)</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leyenda de colores -->
+    <div class="legend-row">
+        <div><span class="legend-dot p-plan"></span>T_planning</div>
+        <div><span class="legend-dot p-ret"></span>T_retrieval</div>
+        <div><span class="legend-dot p-llm"></span>T_LLM</div>
+    </div>
+</div>
+
+</body>
+</html>

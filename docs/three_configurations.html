@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Comparativo Tri-Configuración RAG</title>
+    <style>
+        :root {
+            --bg-primary: #0a0f24;
+            --bg-surface: #121833;
+            --border-tech: #1a234a;
+            --text-main: #ffffff;
+            --text-muted: #8fa0dd;
+            --accent-baseline: #00f2fe;
+            --accent-deterministic: #ff9500;
+            --accent-adaptive: #9b5de5;
+            --accent-highlight: #ff3b30;
+            --accent-success: #4cd964;
+        }
+        body {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1500px;
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            border: 1px solid var(--border-tech);
+        }
+        header { text-align: center; margin-bottom: 30px; border-bottom: 1px dashed var(--border-tech); padding-bottom: 15px; }
+        h1 { margin: 0 0 6px 0; font-size: 24px; }
+        .subtitle { color: var(--text-muted); font-size: 13px; margin: 0; }
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+        @media (max-width: 1024px) { .comparison-grid { grid-template-columns: 1fr; gap: 40px; } }
+        .architecture-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: rgba(13, 21, 58, 0.2);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(26, 35, 74, 0.5);
+        }
+        .column-title {
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-tech);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .step-node {
+            background: rgba(13, 21, 58, 0.5);
+            border: 1px solid var(--border-tech);
+            border-radius: 6px;
+            padding: 14px 16px;
+            position: relative;
+        }
+        .step-meta { font-size: 10px; text-transform: uppercase; font-weight: bold; color: var(--text-muted); margin-bottom: 4px; }
+        .step-title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .step-desc { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+        .arrow-v { text-align: center; color: var(--border-tech); font-size: 18px; margin: -6px 0; user-select: none; }
+        .diff-highlight { border: 1px dashed var(--accent-highlight) !important; background: rgba(255, 59, 48, 0.04) !important; }
+        .adaptive-highlight { border: 1px dashed var(--accent-adaptive) !important; background: rgba(155, 93, 229, 0.04) !important; }
+        .diff-badge { position: absolute; top: -8px; right: 12px; color: white; font-size: 8px; font-weight: bold; padding: 2px 6px; border-radius: 10px; text-transform: uppercase; }
+        .border-baseline { border-left: 4px solid var(--accent-baseline); }
+        .border-deterministic { border-left: 4px solid var(--accent-deterministic); }
+        .border-adaptive { border-left: 4px solid var(--accent-adaptive); }
+        .border-success { border-left: 4px solid var(--accent-success); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Comparativa Evolutiva de Arquitecturas RAG</h1>
+        <p class="subtitle">Estructura Interna Colectiva: Flujo Lineal vs. Validación Secuencial vs. Enrutamiento Adaptativo Dinámico</p>
+    </header>
+
+    <div class="comparison-grid">
+        
+        <!-- COLUMNA 1: BASELINE RAG -->
+        <div class="architecture-column">
+            <div class="column-title" style="color: var(--accent-baseline);">📘 1. Classic Baseline RAG</div>
+            <div class="step-node border-baseline">
+                <div class="step-meta">Paso 01</div>
+                <div class="step-title">🔍 Recuperación Plana</div>
+                <div class="step-desc">Extracción por similitud de coseno en base de datos FAISS local con k=5 Chunks estáticos.</div>
+            </div>
+            <div class="arrow-v">↓</div>
+            <div class="step-node border-baseline">
+                <div class="step-meta">Paso 02</div>
+                <div class="step-title">📥 Contexto Crudo</div>
+                <div class="step-desc">Inyección masiva del texto recuperado directamente en la ventana de contexto, sin procesar.</div>
+            </div>
+            <div class="arrow-v">↓</div>
+            <div class="step-node border-baseline">
+                <div class="step-meta">Paso 03</div>
+                <div class="step-title">🤖 Inferencia Secuencial</div>
+                <div class="step-desc">Ejecución del modelo gpt-4o-mini en un único paso directo de lectura y escritura.</div>
+            </div>
+            <div class="arrow-v">↓</div>
+            <div class="step-node border-success">
+                <div class="step-meta">Resultado</div>
+                <div class="step-title">❌ Alucinación Desprotegida</div>
+                <div class="step-desc"><strong>Groundedness: 0.0000</strong><br>Baja latencia (1.33s) pero sin garantías ni validez en las citas asociadas.</div>
+            </div>
+        </div>
+
+        <!-- COLUMNA 2: DETERMINISTIC AGENTIC RAG -->
+        <div class="architecture-column">
+            <div class="column-title" style="color: var(--accent-deterministic);">📙 2. Deterministic Agentic RAG</div>
+            <div class="step-node border-deterministic">
+                <div class="step-meta">Paso 01</div>
+                <div class="step-title">🔍 Recuperación Inicial</div>
+                <div class="step-desc">Idéntica fase de extracción indexada en FAISS (Mismo cuello de botella en Recall@5).</div>
+            </div>
+            <div class="arrow-v">↓</div>
+            <div class="step-node border-deterministic diff-highlight">
+                <span class="diff-badge" style="background: var(--accent-highlight);">Agente Analista</span>
+                <div class="step-meta">Paso 02</div>
+                <div class="step-title">🧠 AnalystAgent Estricto</div>
+                <div class="step-desc">El prompt pasa a control del agente para estructurar y modelar la respuesta borrador de manera lógica.</div>
+            </div>
+            <div class="arrow-v">↓</div>
+            <div class="step-node border-deterministic diff-highlight">
+                <span class="diff-badge" style="background: var(--accent-highlight);">Bucle de Control</span>
+                <div class="step-meta">Paso 03</div>
+                <div class="step-title">🔄 EvidenceAgent + Validator</div>
+                <div class="step-desc">Validación secuencial obligatoria. Forzado de reintentos continuos (hasta max_steps) si el validador halla inconsistencias.</div>
+            </div>
+            <div class="arrow-v">↓</div>
+            <div class="step-node border-success">
+                <div class="step-meta">Resultado</div>
+                <div class="step-title">🛡️ Precisión Segura</div>
+                <div class="step-desc"><strong>Groundedness: 0.9068</strong><br>Salida blindada de alta fidelidad, con coste de latencia elevado (1.76s) y 3.5 llamadas promedio.</div>
+            </div>
+        </div>
+
+        <!-- COLUMNA 3: ADAPTIVE AGENTIC RAG -->
+        <div class="architecture-column">
+            <div class="column-title" style="color: var(--accent-adaptive);">🔮 3. Adaptive Agentic RAG</div>
+            <div class="step-node border-adaptive">
+                <div class="step-meta">Paso 01</div>
+                <div class="step-title">🔍 Recuperación de Origen</div>
+                <div class="step-desc">Se mantiene la base de recuperación cruzada FAISS compartida uniformemente (0.1818 Recall).</div>
+            </div>
+            <div class="arrow-v">↓</div>
+            <div class="step-node border-adaptive adaptive-highlight">
+                <span class="diff-badge" style="background: var(--accent-adaptive);">Orquestador</span>
+                <div class="step-meta">Paso 02</div>
+                <div class="step-title">🔮 CoordinatorAgent Activo</div>
+                <div class="step-desc">El "cerebro" evalúa la complejidad del problema inicial y decide el camino óptimo dinámicamente.</div>
+            </div>
+            <div class="arrow-v">↓</div>
+            <div class="step-node border-adaptive adaptive-highlight">
+                <span class="diff-badge" style="background: var(--accent-adaptive);">Ruta Inteligente</span>
+                <div class="step-meta">Paso 03</div>
+                <div class="step-title">🔀 Fast-Track / Reintentos Elásticos</div>
+                <div class="step-desc">Se omiten validaciones si la consulta es directa (Fast track) o se invocan sub-agentes solo bajo demanda estricta.</div>
+            </div>
+            <div class="arrow-v">↓</div>
+            <div class="step-node border-success" style="border-left: 4px solid var(--accent-success) !important;">
+                <span class="diff-badge" style="background: var(--accent-success);">Eficiencia Máxima</span>
+                <div class="step-meta">Resultado</div>
+                <div class="step-title">⚡ Alta Calidad Optimizada</div>
+                <div class="step-desc"><strong>Groundedness: 0.9031</strong><br>Mantiene la robustez agéntica reduciendo la latencia a 1.56s y bajando a 3.33 llamadas de LLM.</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
