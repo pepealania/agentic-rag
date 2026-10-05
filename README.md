@@ -166,6 +166,44 @@ paths:
 
 Parameters should be modified through the configuration file rather than being duplicated throughout the source code.
 
+## Prolog deterministic workflow
+
+The Prolog-backed workflow reuses the deterministic retrieve, analyze, validate, and finalize graph. In Colab, install SWI-Prolog and the optional Python binding:
+
+```python
+!apt-get update -qq && apt-get install -y -qq swi-prolog
+!pip install -q -e ".[prolog]"
+```
+
+Set `OPENAI_API_KEY` in the Colab environment before running the default `AnalystAgent`. Then provide employee/task records in `raw_data`:
+
+```python
+from agentic_rag.prolog_workflow import PrologDeterministicAgenticRAGWorkflow
+from agentic_rag.schemas import Question
+
+workflow = PrologDeterministicAgenticRAGWorkflow(max_retries=1)
+result = workflow.run({
+  "question": Question(
+    question_id="q1",
+    question="¿Quién está sobrecargado o requiere asistencia?",
+  ),
+  "raw_data": [
+    {"tipo": "empleado", "nombre": "Ana", "rol": "analista"},
+    {"tipo": "tarea", "id": "t1", "empleado": "Ana", "estado": "pendiente"},
+    {"tipo": "tarea", "id": "t2", "empleado": "Ana", "estado": "pendiente"},
+    {"tipo": "tarea", "id": "t3", "empleado": "Ana", "estado": "pendiente"},
+    {"tipo": "tarea", "id": "t4", "empleado": "Ana", "estado": "pendiente"},
+    {"tipo": "tarea", "id": "t5", "empleado": "Ana", "estado": "retrasada"},
+  ],
+})
+
+print(result["answer"].answer)
+print(result["prolog_results"])
+print(result["validation_passed"])
+```
+
+By default, Prolog marks an employee as overloaded with more than three pending tasks and as requiring assistance when at least one task is delayed. The Prolog deductions are passed to the analyst as a citable evidence chunk.
+
 ## Running an experiment
 
 The executable implementation is located under:
