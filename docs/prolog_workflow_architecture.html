@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eef3ef">
+  <title>Flujo determinista Agentic RAG con Prolog | Arquitectura</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: #eef3ef;
+      --paper: #fbfdfb;
+      --ink: #17231f;
+      --muted: #52635c;
+      --line: #cbd7d0;
+      --green: #176b50;
+      --green-soft: #e2f2e9;
+      --blue: #176a86;
+      --blue-soft: #e2f2f6;
+      --orange: #ad4d16;
+      --orange-soft: #fff0e5;
+      --red: #a43c42;
+      --red-soft: #fbeaec;
+      --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      --sans: "Aptos", "Segoe UI", sans-serif;
+      --serif: Georgia, "Times New Roman", serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background-color: var(--canvas);
+      background-image: linear-gradient(rgba(23, 35, 31, .035) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(23, 35, 31, .035) 1px, transparent 1px);
+      background-size: 28px 28px;
+      font-family: var(--sans);
+      line-height: 1.45;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 44px 0 56px;
+    }
+
+    .masthead {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 24px;
+      padding: 0 0 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow, .section-kicker, .node-tag, .route-label, .micro-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow { color: var(--green); margin: 0 0 8px; }
+    h1 {
+      max-width: 780px;
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(34px, 5vw, 58px);
+      font-weight: 600;
+      line-height: 1.02;
+    }
+    .dek { max-width: 680px; margin: 13px 0 0; color: var(--muted); font-size: 15px; }
+    .version {
+      border: 1px solid var(--line);
+      padding: 8px 11px;
+      color: var(--muted);
+      background: var(--paper);
+      font: 11px var(--mono);
+      white-space: nowrap;
+    }
+
+    .architecture {
+      margin-top: 28px;
+      padding: 24px;
+      background: rgba(251, 253, 251, .86);
+      border: 1px solid var(--line);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .section-kicker { margin: 0; color: var(--muted); }
+    .section-note { margin: 0; color: var(--muted); font-size: 12px; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .main-flow {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-content: start;
+    }
+
+    .node {
+      position: relative;
+      padding: 16px 18px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--green);
+    }
+    .node.input { border-left-color: var(--ink); }
+    .node.prolog { border-left-color: var(--green); }
+    .node.analysis { border-left-color: var(--blue); }
+    .node.validation { border-left-color: var(--orange); }
+    .node.retry { border-left-color: var(--red); }
+    .node.final { border-left-color: var(--green); }
+
+    .node-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .node h2, .node h3 { margin: 3px 0 0; font-size: 17px; line-height: 1.2; }
+    .node p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+    .node-tag { color: var(--muted); font-size: 10px; }
+    .code { font-family: var(--mono); font-size: 11px; }
+    .question-example {
+      padding: 10px 12px;
+      color: var(--ink) !important;
+      background: var(--blue-soft);
+      border-left: 3px solid var(--blue);
+      font-weight: 600;
+    }
+    .retrieval-details {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(230px, .85fr);
+      gap: 15px;
+      margin-top: 14px;
+    }
+    .vector-lane, .logic-lane {
+      min-width: 0;
+      padding: 12px;
+      background: #f4f8f5;
+      border-top: 3px solid var(--blue);
+    }
+    .logic-lane {
+      background: #f1f7f2;
+      border-top-color: var(--green);
+    }
+    .lane-title {
+      margin: 0 0 8px;
+      font-size: 13px;
+    }
+    .lane-copy { margin: 7px 0 0; color: var(--muted); font-size: 11px; }
+    .index-build {
+      padding: 9px;
+      color: #24533f;
+      background: var(--green-soft);
+      font-size: 11px;
+    }
+    .index-build strong { display: block; margin-bottom: 3px; color: var(--green); }
+    .query-flow {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr) 18px minmax(0, 1fr) 18px minmax(0, 1fr);
+      gap: 5px;
+      align-items: stretch;
+      margin-top: 10px;
+    }
+    .query-stage {
+      min-width: 0;
+      padding: 8px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      font-size: 10px;
+      overflow-wrap: anywhere;
+    }
+    .query-stage strong { display: block; margin-bottom: 4px; color: var(--blue); }
+    .query-arrow { display: grid; place-items: center; color: var(--blue); font: 14px var(--mono); }
+    .chunk-fields { color: var(--muted); font: 10px/1.55 var(--mono); overflow-wrap: anywhere; }
+    .logic-rules { margin: 8px 0 0; padding-left: 16px; color: var(--muted); font-size: 11px; }
+    .logic-rules li + li { margin-top: 5px; }
+    .gap-notice {
+      margin-top: 10px;
+      padding: 9px 10px;
+      color: #71380f;
+      background: var(--orange-soft);
+      border-left: 3px solid var(--orange);
+      font-size: 11px;
+    }
+    .gap-notice strong { display: block; margin-bottom: 3px; }
+    .merge-evidence {
+      margin-top: 10px;
+      padding: 9px 11px;
+      color: #124d38;
+      background: var(--green-soft);
+      border-left: 3px solid var(--green);
+      font-size: 11px;
+    }
+
+    .model-architecture { margin-top: 20px; }
+    .base-source {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      text-align: center;
+      background: #1c322a;
+      color: #f1f7f3;
+      border-top: 4px solid var(--green);
+    }
+    .base-source .node-tag { color: #9dd6b8; }
+    .base-source h3 { margin: 5px 0; font: 20px var(--serif); }
+    .base-source p { margin: 0; color: #c0d2c8; font-size: 12px; }
+    .projection-arrow {
+      margin: 7px auto 14px;
+      color: var(--green);
+      text-align: center;
+      font: 12px var(--mono);
+    }
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .model-card {
+      min-width: 0;
+      padding: 15px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--blue);
+    }
+    .model-card.facts-card { border-top-color: var(--green); }
+    .model-card.mcp-card { border-top-color: var(--orange); }
+    .model-card h3 { margin: 5px 0 8px; font-size: 15px; }
+    .model-card p { margin: 7px 0 0; color: var(--muted); font-size: 12px; }
+    .model-card pre {
+      margin: 10px 0 0;
+      padding: 10px;
+      color: #34463e;
+      background: #f2f6f3;
+      font: 10px/1.55 var(--mono);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .model-status {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 7px;
+      color: var(--muted);
+      background: var(--canvas);
+      font: 10px var(--mono);
+      text-transform: uppercase;
+    }
+    .authority-note {
+      margin-top: 13px;
+      padding: 11px 13px;
+      color: #71380f;
+      background: var(--orange-soft);
+      border-left: 4px solid var(--orange);
+      font-size: 12px;
+    }
+    .retrieval-results {
+      margin-top: 12px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+    .retrieval-results summary {
+      padding: 10px 12px;
+      color: var(--blue);
+      cursor: pointer;
+      font: 11px var(--mono);
+    }
+    .results-scroll { overflow-x: auto; }
+    .results-table {
+      width: 100%;
+      min-width: 980px;
+      border-collapse: collapse;
+      font-size: 10px;
+    }
+    .results-table th, .results-table td {
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+      border-top: 1px solid var(--line);
+      overflow-wrap: anywhere;
+    }
+    .results-table th {
+      color: var(--muted);
+      background: #f2f6f3;
+      font: 10px var(--mono);
+      white-space: nowrap;
+    }
+    .results-table td.score { color: var(--green); font: 11px var(--mono); font-weight: 700; }
+
+    .connector {
+      height: 32px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font: 17px var(--mono);
+    }
+    .connector span {
+      display: grid;
+      width: 26px;
+      height: 26px;
+      place-items: center;
+      background: var(--canvas);
+      border: 1px solid var(--line);
+    }
+
+    .rule-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 13px;
+    }
+    .rule {
+      padding: 9px 10px;
+      color: #24533f;
+      background: var(--green-soft);
+      border: 1px solid #c8e3d2;
+      font-size: 12px;
+    }
+    .rule strong { display: block; margin-bottom: 2px; color: var(--green); }
+
+    .decision-label {
+      margin: 15px 0 9px;
+      text-align: center;
+      color: var(--muted);
+      font: 11px var(--mono);
+      text-transform: uppercase;
+    }
+
+    .branches {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .branch {
+      padding: 13px;
+      border: 1px solid var(--line);
+      background: #f7faf7;
+    }
+    .branch.retry-branch { background: var(--red-soft); border-color: #ecc8cb; }
+    .branch.done-branch { background: var(--green-soft); border-color: #c8e3d2; }
+    .route-label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 10px; }
+    .retry-branch .route-label { color: var(--red); }
+    .done-branch .route-label { color: var(--green); }
+    .branch p { margin: 0; color: var(--ink); font-size: 12px; }
+    .loop-back {
+      grid-column: 1 / -1;
+      padding: 9px 11px;
+      text-align: center;
+      color: var(--red);
+      border: 1px dashed #d69b9f;
+      background: #fff7f7;
+      font: 11px var(--mono);
+    }
+
+    .state-panel {
+      padding: 17px;
+      color: #f1f7f3;
+      background: #1c322a;
+      align-self: stretch;
+    }
+    .state-panel .section-kicker { color: #9dd6b8; }
+    .state-panel h2 { margin: 6px 0 10px; font: 22px var(--serif); }
+    .state-panel p { margin: 0 0 14px; color: #c0d2c8; font-size: 12px; }
+    .state-list { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+    .state-list li {
+      padding: 7px 9px;
+      border: 1px solid rgba(216, 238, 225, .2);
+      color: #e1efe7;
+      font: 11px var(--mono);
+      overflow-wrap: anywhere;
+    }
+    .state-panel .scope-note {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(216, 238, 225, .22);
+      font-size: 11px;
+    }
+
+    .supporting {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-top: 22px;
+    }
+    .support-block {
+      padding-top: 13px;
+      border-top: 2px solid var(--ink);
+    }
+    .support-block h2 { margin: 0 0 7px; font-size: 13px; }
+    .support-block p { margin: 0; color: var(--muted); font-size: 12px; }
+    .support-block strong { color: var(--ink); }
+    .files { font: 11px var(--mono); color: var(--green); }
+
+    .example-run {
+      margin-top: 27px;
+      padding-top: 21px;
+      border-top: 1px solid var(--line);
+    }
+    .example-title {
+      margin: 4px 0 0;
+      font: 25px var(--serif);
+    }
+    .example-warning {
+      margin: 0 0 15px;
+      padding: 10px 12px;
+      color: #71380f;
+      background: var(--orange-soft);
+      border-left: 4px solid var(--orange);
+      font-size: 12px;
+    }
+    .execution-steps {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .trace-card {
+      min-width: 0;
+      padding: 13px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-top: 4px solid var(--green);
+    }
+    .trace-card.trace-prolog { border-top-color: var(--green); }
+    .trace-card.trace-analyst { border-top-color: var(--blue); }
+    .trace-card.trace-validator { border-top-color: var(--orange); }
+    .trace-step {
+      color: var(--muted);
+      font: 10px var(--mono);
+      text-transform: uppercase;
+    }
+    .trace-card h3 { margin: 6px 0 8px; font-size: 14px; }
+    .trace-card p, .trace-card li { color: var(--muted); font-size: 11px; }
+    .trace-card p { margin: 7px 0 0; }
+    .trace-card ul { margin: 8px 0 0; padding-left: 16px; }
+    .trace-card li + li { margin-top: 4px; }
+    .trace-card .result { color: var(--green); font-weight: 700; }
+    .memory-section {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+    .memory-title { margin: 0 0 10px; font: 20px var(--serif); }
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+    }
+    .memory-card {
+      min-width: 0;
+      padding: 11px;
+      background: #f7faf8;
+      border: 1px solid var(--line);
+      border-top: 3px solid var(--green);
+    }
+    .memory-card.retry-memory { border-top-color: var(--red); }
+    .memory-card h4 { margin: 0 0 7px; font-size: 12px; }
+    .memory-card pre {
+      margin: 0;
+      color: #34463e;
+      font: 10px/1.55 var(--mono);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .memory-note { margin: 9px 0 0; color: var(--muted); font-size: 11px; }
+    .answer-sample {
+      margin-top: 8px;
+      padding: 8px;
+      color: #154c6a;
+      background: var(--blue-soft);
+      font-size: 11px;
+    }
+    .log-panel {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      margin-top: 12px;
+      padding: 14px;
+      color: #f1f7f3;
+      background: #1c322a;
+    }
+    .log-panel h3 { margin: 0; font: 18px var(--serif); }
+    .log-panel p { margin: 6px 0 0; color: #c0d2c8; font-size: 11px; }
+    .log-panel pre {
+      margin: 0;
+      overflow-x: auto;
+      color: #e1efe7;
+      font: 10px/1.6 var(--mono);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 22px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font: 10px var(--mono);
+    }
+
+    @media (max-width: 760px) {
+      .page { width: min(100% - 24px, 620px); padding-top: 25px; }
+      .masthead { grid-template-columns: 1fr; align-items: start; }
+      .version { justify-self: start; }
+      .architecture { padding: 15px; }
+      .section-head { display: block; }
+      .section-note { margin-top: 6px; }
+      .flow { grid-template-columns: 1fr; }
+      .state-panel { order: -1; }
+      .branches, .rule-strip, .supporting, .execution-steps, .retrieval-details, .memory-grid, .model-grid { grid-template-columns: 1fr; }
+      .query-flow { grid-template-columns: 1fr; }
+      .query-arrow { transform: rotate(90deg); }
+      .loop-back { grid-column: auto; }
+      .log-panel { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 5px; }
+    }
+
+    @media print {
+      body { background: white; }
+      .page { width: 100%; padding: 0; }
+      .architecture { background: white; }
+      .node, .state-panel, .branch { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">Agentic RAG / Arquitectura 01</p>
+        <h1>Flujo determinista con Prolog</h1>
+        <p class="dek">Un pipeline acotado de LangGraph que transforma registros estructurados de empleados y tareas en deducciones Prolog, y las utiliza para generar y validar una respuesta.</p>
+      </div>
+      <div class="version">LANGGRAPH · PROLOG · LLM</div>
+    </header>
+
+    <section class="architecture" aria-labelledby="flow-title">
+      <div class="section-head">
+        <p class="section-kicker" id="flow-title">Grafo de ejecución</p>
+            <p class="section-note">Recuperación vectorial + deducción lógica; enrutamiento fijo con reintentos acotados.</p>
+      </div>
+
+      <div class="flow">
+        <div class="main-flow">
+          <article class="node input">
+            <div class="node-head">
+              <div>
+                <span class="node-tag">Entrada · START</span>
+                <h2>Pregunta + registros estructurados</h2>
+              </div>
+              <span class="code">PrologAgentState</span>
+            </div>
+            <p><span class="code">question: Question</span> consulta un <span class="code">VectorStore</span> construido e inyectado por separado; <span class="code">raw_data: list[dict]</span> alimenta Prolog.</p>
+            <p>Texto vectorizado, hechos simbólicos y acceso MCP son vías distintas; pueden describir el mismo dato y deben conservar su procedencia.</p>
+            <p class="question-example">Pregunta real del benchmark (Q06): ¿Qué tareas de EMP-006 presentaron retrasos durante el periodo?</p>
+          </article>
+
+          <div class="connector" aria-hidden="true"><span>↓</span></div>
+
+          <article class="node prolog">
+            <div class="node-head">
+              <div>
+                <span class="node-tag">Nodo 1 · retrieve</span>
+                <h2>PrologEvidenceAgent</h2>
+              </div>
+              <span class="code">Adaptador de evidencia</span>
+            </div>
+            <p>El adaptador ejecuta recuperación vectorial y razonamiento lógico con los datos de esta misma consulta.</p>
+            <div class="retrieval-details">
+              <section class="vector-lane" aria-label="Búsqueda vectorial FAISS">
+                <h3 class="lane-title">Rama vectorial · EvidenceAgent + FAISS</h3>
+                <div class="index-build"><strong>Índice documental, construido previamente</strong>Documentos → chunks de texto → <span class="code">embed_documents(normalize_embeddings=True)</span> → <span class="code">IndexFlatIP</span>.</div>
+                <p class="lane-copy">En cada pregunta se calcula un embedding nuevo:</p>
+                <div class="query-flow">
+                  <div class="query-stage"><strong>1 · Pregunta</strong>Q06 en texto: “¿Qué tareas de EMP-006 presentaron retrasos durante el periodo?”</div>
+                  <div class="query-arrow" aria-hidden="true">→</div>
+                  <div class="query-stage"><strong>2 · Embedding</strong><span class="code">embed_query()</span><br>Vector normalizado; misma dimensión que los chunks.</div>
+                  <div class="query-arrow" aria-hidden="true">→</div>
+                  <div class="query-stage"><strong>3 · Búsqueda</strong><span class="code">IndexFlatIP.search()</span><br>Producto interno = coseno porque ambos vectores tienen norma 1.</div>
+                  <div class="query-arrow" aria-hidden="true">→</div>
+                  <div class="query-stage"><strong>4 · Top 5</strong><span class="code">top_k=5</span><br>Ordenados por score; se devuelven hasta 5 chunks.</div>
+                </div>
+                <p class="lane-copy">Cada resultado se conserva como <span class="code">RetrievedChunk</span>. Ejecución real sobre 288 documentos / 291 chunks con <span class="code">all-MiniLM-L6-v2</span>:</p>
+                <details class="retrieval-results" open>
+                  <summary>Ver los 5 RetrievedChunk obtenidos · similitud coseno</summary>
+                  <div class="results-scroll">
+                    <table class="results-table">
+                      <thead>
+                        <tr><th>rank</th><th>document_id</th><th>chunk_id</th><th>source</th><th>chunk_index</th><th>score</th><th>text</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>1</td><td>DOC-273</td><td>DOC-273_chunk_0000</td><td>data/processed/corpus_sprint1.jsonl#DOC-273</td><td>0</td><td class="score">0.757957</td>
+                          <td>Reporte de avance de EMP-023 correspondiente a M06. El empleado mantiene seguimiento de las tareas asignadas en PROJ-005. El avance documentado es consistente con las tareas registradas para el periodo. Durante la segunda mitad del periodo se observa mayor estabilidad y reducción de retrasos. A partir de M04 se observa un cambio hacia menor cantidad de retrasos y mayor cumplimiento.</td>
+                        </tr>
+                        <tr>
+                          <td>2</td><td>DOC-110</td><td>DOC-110_chunk_0000</td><td>data/processed/corpus_sprint1.jsonl#DOC-110</td><td>0</td><td class="score">0.737143</td>
+                          <td>EMP-010 tuvo la tarea TASK-056 asignada durante M02. La tarea presentó retraso respecto a la fecha prevista y no se documentó finalización dentro del periodo.</td>
+                        </tr>
+                        <tr>
+                          <td>3</td><td>DOC-272</td><td>DOC-272_chunk_0000</td><td>data/processed/corpus_sprint1.jsonl#DOC-272</td><td>0</td><td class="score">0.736891</td>
+                          <td>Reporte de avance de EMP-023 correspondiente a M04. El empleado mantiene seguimiento de las tareas asignadas en PROJ-005. El avance documentado es consistente con las tareas registradas para el periodo. Durante la segunda mitad del periodo se observa mayor estabilidad y reducción de retrasos. A partir de M04 se observa un cambio hacia menor cantidad de retrasos y mayor cumplimiento.</td>
+                        </tr>
+                        <tr>
+                          <td>4</td><td>DOC-062</td><td>DOC-062_chunk_0000</td><td>data/processed/corpus_sprint1.jsonl#DOC-062</td><td>0</td><td class="score">0.733918</td>
+                          <td>EMP-006 tuvo la tarea TASK-032 asignada durante M02. La tarea presentó retraso respecto a la fecha prevista y no se documentó finalización dentro del periodo.</td>
+                        </tr>
+                        <tr>
+                          <td>5</td><td>DOC-061</td><td>DOC-061_chunk_0000</td><td>data/processed/corpus_sprint1.jsonl#DOC-061</td><td>0</td><td class="score">0.731102</td>
+                          <td>EMP-006 tuvo la tarea TASK-031 asignada durante M01. La tarea presentó retraso respecto a la fecha prevista y no se documentó finalización dentro del periodo.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </details>
+              </section>
+
+              <section class="logic-lane" aria-label="Inferencia lógica Prolog">
+                <h3 class="lane-title">Rama lógica · PrologKnowledgeManager</h3>
+                <p class="lane-copy">Recibe de quien invoca el workflow una lista <span class="code">raw_data</span> ya estructurada:</p>
+                <p class="chunk-fields">tarea(TASK-031, EMP-006, retrasada)<br>tarea(TASK-032, EMP-006, retrasada)</p>
+                <ul class="logic-rules">
+                  <li>Empleado registrado y más de 3 tareas pendientes → <span class="code">sobrecargado(Empleado)</span>.</li>
+                  <li>Al menos 1 tarea retrasada → <span class="code">requiere_asistencia(Empleado)</span>.</li>
+                </ul>
+                <div class="gap-notice"><strong>Conversión JSONL → hechos: pendiente</strong>El código actual no abre el JSONL ni extrae estados desde <span class="code">content</span>. Sin <span class="code">raw_data</span>, recibe <span class="code">[]</span> y no crea el chunk Prolog.</div>
+                <p class="lane-copy">Con hechos cargados, las deducciones se serializan como un fragmento Prolog citable.</p>
+              </section>
+            </div>
+            <p class="merge-evidence"><strong>Fusión:</strong> hasta 5 chunks vectoriales con texto y score + 0 o 1 chunk Prolog (solo si <span class="code">facts_loaded</span>) → <span class="code">retrieved_chunks</span> para el AnalystAgent.</p>
+          </article>
+
+          <div class="connector" aria-hidden="true"><span>↓</span></div>
+
+          <article class="node analysis">
+            <div class="node-head">
+              <div>
+                <span class="node-tag">Nodo 2 · analyze</span>
+                <h2>AnalystAgent</h2>
+              </div>
+              <span class="code">LLM · temperature 0</span>
+            </div>
+            <p>Recibe la pregunta, el texto y score de cada chunk FAISS y el fragmento de deducciones Prolog; devuelve un <span class="code">Answer</span> con hechos y citas.</p>
+          </article>
+
+          <div class="connector" aria-hidden="true"><span>↓</span></div>
+
+          <article class="node validation">
+            <div class="node-head">
+              <div>
+                <span class="node-tag">Nodo 3 · validate</span>
+                <h2>AnswerValidator</h2>
+              </div>
+              <span class="code">Esquema + validación de citas</span>
+            </div>
+            <p>Comprueba el esquema, que cada cita corresponda a un fragmento FAISS o Prolog entregado, su fuente y un solapamiento textual básico.</p>
+          </article>
+
+          <p class="decision-label">Enrutamiento determinista · resultado de validación + retry_count</p>
+          <div class="branches">
+            <div class="branch retry-branch">
+              <span class="route-label">Validación fallida · quedan reintentos</span>
+              <p><strong>prepare_retry</strong> incrementa <span class="code">retry_count</span> y registra la decisión.</p>
+            </div>
+            <div class="branch done-branch">
+              <span class="route-label">Validación aprobada · o reintentos agotados</span>
+              <p><strong>finalize → END</strong> registra la ruta final y devuelve el estado.</p>
+            </div>
+            <div class="loop-back">prepare_retry → retrieve → analyze → validate</div>
+          </div>
+        </div>
+
+        <aside class="state-panel" aria-label="Workflow state">
+          <p class="section-kicker">Estado que recorre el grafo</p>
+          <h2>PrologAgentState</h2>
+          <p>Extiende el estado RAG compartido sin añadir campos Prolog a los demás workflows.</p>
+          <ul class="state-list">
+            <li>question</li>
+            <li>raw_data</li>
+            <li>facts_loaded</li>
+            <li>prolog_results</li>
+            <li>retrieved_chunks</li>
+            <li>answer</li>
+            <li>validation_errors</li>
+            <li>retry_count · step_count</li>
+            <li>decision_log · tool_results</li>
+          </ul>
+          <p class="scope-note">El workflow Prolog compila su propio StateGraph; los grafos congelados conservan su esquema. <span class="code">retrieved_chunks</span> reúne evidencia FAISS y Prolog.</p>
+        </aside>
+      </div>
+
+      <section class="example-run" aria-labelledby="example-title">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Pregunta real del benchmark · Q06</p>
+            <h2 class="example-title" id="example-title">¿Qué tareas de EMP-006 presentaron retrasos durante el periodo?</h2>
+          </div>
+          <p class="section-note">Recorrido por la arquitectura determinista</p>
+        </div>
+
+        <p class="example-warning"><strong>Datos originales y limitación actual:</strong> DOC-061/062 describen TASK-031/032 como retrasadas. En la estructura de ejemplo se proyectan solo esos dos hechos; esa conversión JSONL no está implementada todavía.</p>
+
+        <div class="execution-steps">
+          <article class="trace-card">
+            <span class="trace-step">Entrada · START</span>
+            <h3>Pregunta y hechos</h3>
+            <p><span class="code">Q06</span> pregunta cuáles tareas se retrasaron.</p>
+            <ul>
+              <li>TASK-031: retrasada · DOC-061</li>
+              <li>TASK-032: retrasada · DOC-062</li>
+              <li>TASK-033–036: completadas</li>
+            </ul>
+            <p>Dos hechos de tarea derivados de DOC-061/062; quien llama al workflow debe pasarlos como <span class="code">raw_data</span>.</p>
+          </article>
+
+          <article class="trace-card trace-prolog">
+            <span class="trace-step">Paso 1 · retrieve</span>
+            <h3>Gestor de conocimiento</h3>
+            <p>FAISS devuelve hasta 5 fragmentos con <span class="code">document_id</span>, <span class="code">chunk_id</span>, <span class="code">source</span>, <span class="code">text</span> y <span class="code">score</span>. Prolog solo infiere si recibió hechos por <span class="code">raw_data</span>.</p>
+            <p>Si se pasan los registros convertidos que se muestran arriba:</p>
+            <ul>
+              <li>Q06 se compara con embeddings normalizados.</li>
+              <li>FAISS: producto interno = coseno.</li>
+              <li>Sin hecho <span class="code">empleado/2</span>, la regla de sobrecarga no tiene candidato.</li>
+              <li>2 retrasadas → asistencia: EMP-006.</li>
+            </ul>
+            <p class="result">Evidencia fusionada: top 5 vectorial + deducción Prolog.</p>
+          </article>
+
+          <article class="trace-card trace-analyst">
+            <span class="trace-step">Paso 2 · analyze</span>
+            <h3>Evidencia y respuesta</h3>
+            <p>El AnalystAgent recibe pregunta + top 5 vectorial + deducción. En esta búsqueda DOC-062 y DOC-061 aparecen en rangos 4 y 5.</p>
+            <div class="answer-sample">FAISS recuperó realmente los textos de TASK-032 y TASK-031. Si quien ejecuta transforma esos documentos y los pasa a raw_data, Prolog también deduce que EMP-006 requiere asistencia.</div>
+            <p>Citas: chunks FAISS y/o <span class="code">prolog_knowledge_base / prolog_inference_1</span></p>
+          </article>
+
+          <article class="trace-card trace-validator">
+            <span class="trace-step">Pasos 3–4 · validate → finalize</span>
+            <h3>Validación y salida</h3>
+            <ul>
+              <li>Esquema válido</li>
+              <li>Cita puede ser válida</li>
+              <li>No comprueba que la respuesta identifique las tareas</li>
+            </ul>
+            <p class="result">Puede pasar por solapamiento léxico</p>
+            <p>La validación no detecta falta de IDs; la ruta depende de los errores recibidos.</p>
+          </article>
+        </div>
+
+        <section class="memory-section" aria-labelledby="memory-title">
+          <h3 class="memory-title" id="memory-title">Datos en memoria · PrologAgentState</h3>
+          <p class="memory-note">Cada tarjeta muestra la estructura acumulada al salir del paso. LangGraph fusiona actualizaciones parciales: los campos previos continúan presentes salvo que se actualicen.</p>
+          <div class="memory-grid">
+            <article class="memory-card">
+              <h4>0 · Entrada a START</h4>
+              <pre>{
+  question: Question(
+    question_id="Q06",
+    question="¿Qué tareas de EMP-006 presentaron retrasos...?"
+  ),
+  raw_data: [
+    {tipo: "tarea", id: "TASK-031", empleado: "EMP-006", estado: "retrasada"},
+    {tipo: "tarea", id: "TASK-032", empleado: "EMP-006", estado: "retrasada"}
+  ],
+  retry_count: 0,
+  step_count: 0,
+  max_steps: 8,
+  validation_errors: [],
+  decision_log: [],
+  tool_results: []
+}</pre>
+            </article>
+
+            <article class="memory-card">
+              <h4>1 · Después de retrieve</h4>
+              <pre>{
+  question: Question(Q06, ...),
+  raw_data: [2 registros task],
+  query_used: pregunta Q06,
+  facts_loaded: true,
+  prolog_results: {
+    empleados_sobrecargados: [],
+    requieren_asistencia: ["EMP-006"]
+  },
+  retrieved_chunks: [
+    RetrievedChunk(document_id, chunk_id,
+      source, text, chunk_index, score),  # 0..5 FAISS
+    RetrievedChunk("prolog_knowledge_base",
+      "prolog_inference_1", ..., score=1.0) # si hay hechos
+  ],
+  tool_results: [vector_search, 2 prolog_query],
+  step_count: 1,
+  decision_log: [..., {decision: "retrieve", step: 1}]
+}</pre>
+              <p><span class="code">requiere_asistencia</span> sí se deduce. La lista vacía de sobrecarga no prueba ausencia: falta el hecho empleado requerido por esa regla.</p>
+            </article>
+
+            <article class="memory-card">
+              <h4>2 · Después de analyze</h4>
+              <pre>{
+  answer: Answer(
+    question_id=Q06,
+    answer=texto del LLM,
+    facts=[...],
+    indicators=[...],
+    uncertainty=[...],
+    citations=[Citation(document_id, chunk_id, source)],
+    human_review=bool,
+    abstained=bool
+  ),
+  step_count: 2,
+  decision_log: [..., {
+    agent: "analyst",
+    decision: "generated_structured_answer",
+    citation_count: n,
+    evidence_count: n
+  }]
+}</pre>
+            </article>
+
+            <article class="memory-card">
+              <h4>3 · Después de validate</h4>
+              <pre>{
+  validation_errors: ["..."],
+  validation_passed: true|false,
+  answer_sufficient: true|false,
+  step_count: 3,
+  decision_log: [..., {
+    agent: "validator",
+    decision: "validation_passed|validation_failed",
+    error_count: n
+  }]
+}</pre>
+            </article>
+
+            <article class="memory-card retry-memory">
+              <h4>4 · Si falla: prepare_retry</h4>
+              <pre>{
+  retry_count: 1,
+  step_count: 3,
+  decision_log: [..., {
+    agent: "deterministic_coordinator",
+    decision: "retry",
+    reason: "validation_failed_and_retry_available",
+    retry_count: 1,
+    step: 3
+  }]
+}</pre>
+              <p>Luego vuelve a retrieve; <span class="code">max_retries=1</span> por defecto.</p>
+            </article>
+
+            <article class="memory-card">
+              <h4>4 · Ruta final tras aprobar</h4>
+              <pre>{
+  route: "finalize",
+  retry_count: 0,
+  step_count: 4,
+  answer: Answer(...),
+  validation_passed: true,
+  validation_errors: [],
+  decision_log: [..., {
+    agent: "deterministic_coordinator",
+    decision: "finalize",
+    step: 4
+  }]
+}</pre>
+            </article>
+          </div>
+          <p class="memory-note">Los chunks, scores, texto del LLM y errores exactos dependen de la ejecución. Si no se pasa <span class="code">raw_data</span>, Prolog devuelve listas vacías, <span class="code">facts_loaded</span> es falso y no agrega su chunk.</p>
+        </section>
+
+        <div class="log-panel">
+          <div>
+            <h3>Traza condicional</h3>
+            <p>Top 5 medido ejecutando VectorStore sobre el corpus JSONL procesado con el modelo configurado. La parte Prolog sigue condicionada a recibir raw_data.</p>
+          </div>
+          <pre>{"agent":"deterministic_coordinator","decision":"retrieve","step":1}
+{"tool":"vector_search","query":"¿Qué tareas de EMP-006 presentaron retrasos durante el periodo?","result_count":5}
+{"tool":"prolog_query","query":"sobrecargado(X)","result_count":0}
+{"tool":"prolog_query","query":"requiere_asistencia(X)","result_count":1}
+{"prolog_results":{"empleados_sobrecargados":[],"requieren_asistencia":["EMP-006"]}}
+{"faiss_top5":["DOC-273 score=0.757957","DOC-110 score=0.737143","DOC-272 score=0.736891","DOC-062 score=0.733918","DOC-061 score=0.731102"]}
+{"prolog_chunk":"prolog_knowledge_base/prolog_inference_1 (solo si raw_data se transforma y carga)"}</pre>
+        </div>
+      </section>
+
+      <div class="supporting">
+        <section class="support-block">
+          <h2>Alcance del determinismo</h2>
+          <p>Las reglas Prolog y el enrutamiento del grafo son deterministas. <strong>La generación de respuestas sigue llamando a un LLM</strong>; temperature 0 no garantiza resultados idénticos.</p>
+        </section>
+        <section class="support-block">
+          <h2>Archivos principales</h2>
+          <p class="files">prolog_workflow.py · gestor_prolog.py · prolog_state.py<br>deterministic_workflow.py · analyst.py · validation.py</p>
+        </section>
+      </div>
+    </section>
+
+    <section class="architecture model-architecture" aria-labelledby="models-title">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Vistas de datos</p>
+          <h2 id="models-title" class="example-title">Tres vías, una misma realidad</h2>
+        </div>
+        <p class="section-note">Son representaciones y mecanismos de acceso distintos; MCP no es otra base de datos.</p>
+      </div>
+
+      <div class="base-source">
+        <span class="node-tag">Fuente base común · una sola verdad de origen</span>
+        <h3>corpus_sprint1.jsonl</h3>
+        <p>Las filas del mismo corpus se proyectan a texto recuperable por FAISS y a hechos simbólicos para Prolog.</p>
+      </div>
+      <div class="projection-arrow" aria-hidden="true">↓ PROYECCIONES DERIVADAS DEL MISMO CORPUS ↓</div>
+
+      <div class="model-grid">
+        <article class="model-card">
+          <span class="node-tag">Proyección A · vista documental</span>
+          <h3>Documento → chunks → embeddings → FAISS</h3>
+          <p>DOC-061 mantiene el texto que describe el retraso de TASK-031. La búsqueda vectorial recupera fragmentos relevantes para la pregunta.</p>
+          <pre>DOC-061 + content
+  → chunk de texto
+  → embedding normalizado
+  → VectorStore / IndexFlatIP
+  → RetrievedChunk + score</pre>
+          <span class="model-status">EvidenceAgent busca en el VectorStore inyectado</span>
+        </article>
+
+        <article class="model-card facts-card">
+          <span class="node-tag">Proyección B · vista simbólica</span>
+          <h3>Hechos estructurados → Prolog</h3>
+          <p>Un hecho no es el documento: es una relación normalizada derivada de sus campos y contenido.</p>
+          <pre>DOC-061
+  → tarea(TASK-031, EMP-006, retrasada)
+  → raw_data
+  → requiere_asistencia(EMP-006)</pre>
+          <span class="model-status">Acepta raw_data; el mapper JSONL aún falta</span>
+        </article>
+
+        <article class="model-card mcp-card">
+          <span class="node-tag">Integración opcional · externa al corpus</span>
+          <h3>Agente → MCP → Oracle</h3>
+          <p>MCP expone una herramienta; Oracle sigue almacenando las filas. El resultado puede ir al contexto del agente o transformarse en hechos.</p>
+          <pre>Agente / cliente MCP
+  → herramienta de consulta
+  → servidor MCP
+  → Oracle: filas autorizadas
+  → contexto o hechos Prolog</pre>
+          <span class="model-status">MCP/Oracle no está conectado en este workflow</span>
+        </article>
+      </div>
+
+      <p class="authority-note"><strong>Fuente de verdad y procedencia:</strong> si la misma tarea aparece en un documento, como hecho y en Oracle, define qué sistema manda y conserva el origen del hecho (por ejemplo, DOC-061 o una fila Oracle). El workflow actual no sincroniza esas fuentes y sus hechos Prolog no guardan procedencia documental.</p>
+    </section>
+
+    <footer>
+      <span>DEDUCCIONES PROLOG → EVIDENCIA CITABLE → RESPUESTA VALIDADA</span>
+      <span>Reintentos acotados · max_retries predeterminado = 1</span>
+    </footer>
+  </main>
+</body>
+</html>

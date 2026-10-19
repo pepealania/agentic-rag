@@ -5,7 +5,7 @@ import pytest
 from agentic_rag.prolog_workflow import (
     PrologDeterministicAgenticRAGWorkflow,
 )
-from agentic_rag.schemas import Answer, Citation, Question
+from agentic_rag.schemas import Answer, Citation, Question, RetrievedChunk
 
 
 class FakeKnowledgeManager:
@@ -21,6 +21,31 @@ class FakeKnowledgeManager:
                 "empleados_sobrecargados": ["Ana"],
                 "requieren_asistencia": ["Ana"],
             },
+        }
+
+
+class FakeVectorEvidenceAgent:
+    def run(self, state):
+        question = state["question"]
+        return {
+            "query_used": question.question,
+            "retrieved_chunks": [
+                RetrievedChunk(
+                    chunk_id="chunk_doc_061",
+                    document_id="DOC-061",
+                    source="corpus_sprint1.jsonl",
+                    text="DOC-061 registra retraso de TASK-031 para EMP-006.",
+                    chunk_index=0,
+                    score=0.91,
+                )
+            ],
+            "tool_results": [
+                {
+                    "tool": "vector_search",
+                    "query": question.question,
+                    "result_count": 1,
+                }
+            ],
         }
 
 
@@ -47,6 +72,7 @@ class FakeAnalyst:
 def test_prolog_workflow_uses_deductions_as_validated_evidence():
     manager = FakeKnowledgeManager()
     workflow = PrologDeterministicAgenticRAGWorkflow(
+        vector_evidence_agent=FakeVectorEvidenceAgent(),
         knowledge_manager=manager,
         analyst_agent=FakeAnalyst(),
     )
@@ -66,6 +92,15 @@ def test_prolog_workflow_uses_deductions_as_validated_evidence():
 
     assert manager.received_data == raw_data
     assert result["prolog_results"]["empleados_sobrecargados"] == ["Ana"]
+    assert [
+        chunk.document_id
+        for chunk in result["retrieved_chunks"]
+    ] == ["DOC-061", "prolog_knowledge_base"]
+    assert [tool["tool"] for tool in result["tool_results"]] == [
+        "vector_search",
+        "prolog_query",
+        "prolog_query",
+    ]
     assert result["validation_passed"] is True
     assert result["validation_errors"] == []
     assert result["retry_count"] == 0

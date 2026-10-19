@@ -179,9 +179,17 @@ Set `OPENAI_API_KEY` in the Colab environment before running the default `Analys
 
 ```python
 from agentic_rag.prolog_workflow import PrologDeterministicAgenticRAGWorkflow
+from agentic_rag.evidence import EvidenceAgent
 from agentic_rag.schemas import Question
 
-workflow = PrologDeterministicAgenticRAGWorkflow(max_retries=1)
+vector_evidence_agent = EvidenceAgent(
+  vector_store=faiss_vector_store,  # índice FAISS construido desde tus chunks
+  top_k=5,
+)
+workflow = PrologDeterministicAgenticRAGWorkflow(
+  vector_evidence_agent=vector_evidence_agent,
+  max_retries=1,
+)
 result = workflow.run({
   "question": Question(
     question_id="q1",

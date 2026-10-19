@@ -9,6 +9,7 @@ from agentic_rag.coordinator import Coordinator
 from agentic_rag.deterministic_workflow import (
     DeterministicAgenticRAGWorkflow,
 )
+from agentic_rag.evidence import EvidenceAgent
 from agentic_rag.gestor_prolog import PrologKnowledgeManager
 from agentic_rag.schemas import RetrievedChunk
 from agentic_rag.prolog_state import PrologAgentState
@@ -23,19 +24,27 @@ class PrologManager(Protocol):
 
 
 class PrologEvidenceAgent:
-    """Adapt Prolog deductions to the deterministic workflow evidence API."""
+    """Combine FAISS retrieval and Prolog deductions as answer evidence."""
 
-    def __init__(self, knowledge_manager: PrologManager) -> None:
+    def __init__(
+        self,
+        knowledge_manager: PrologManager,
+        vector_evidence_agent: EvidenceAgent,
+    ) -> None:
         self.knowledge_manager = knowledge_manager
+        self.vector_evidence_agent = vector_evidence_agent
 
     def run(self, state: PrologAgentState) -> PrologAgentState:
         question = state["question"]
+        vector_result = self.vector_evidence_agent.run(state)
         evaluation = self.knowledge_manager.evaluate(
             state.get("raw_data", [])
         )
         results = evaluation["prolog_results"]
 
-        retrieved_chunks: list[RetrievedChunk] = []
+        retrieved_chunks = list(
+            vector_result.get("retrieved_chunks", [])
+        )
         if evaluation["facts_loaded"]:
             retrieved_chunks.append(
                 RetrievedChunk(
@@ -49,6 +58,10 @@ class PrologEvidenceAgent:
             )
 
         tool_results = [
+            *vector_result.get(
+                "tool_results",
+                state.get("tool_results", []),
+            ),
             {
                 "tool": "prolog_query",
                 "query": "sobrecargado(X)",
@@ -64,14 +77,15 @@ class PrologEvidenceAgent:
         ]
 
         return {
-            "query_used": question.question,
+            **vector_result,
+            "query_used": vector_result.get(
+                "query_used",
+                question.question,
+            ),
             "facts_loaded": evaluation["facts_loaded"],
             "prolog_results": results,
             "retrieved_chunks": retrieved_chunks,
-            "tool_results": [
-                *state.get("tool_results", []),
-                *tool_results,
-            ],
+            "tool_results": tool_results,
         }
 
     @staticmethod
@@ -97,6 +111,7 @@ class PrologDeterministicAgenticRAGWorkflow(
 
     def __init__(
         self,
+        vector_evidence_agent: EvidenceAgent,
         knowledge_manager: PrologManager | None = None,
         analyst_agent: AnalystAgent | None = None,
         validator: AnswerValidator | None = None,
@@ -106,7 +121,8 @@ class PrologDeterministicAgenticRAGWorkflow(
         self.prolog_evidence_agent = PrologEvidenceAgent(
             knowledge_manager
             if knowledge_manager is not None
-            else PrologKnowledgeManager()
+            else PrologKnowledgeManager(),
+            vector_evidence_agent,
         )
         if max_steps < 4:
             raise ValueError(
