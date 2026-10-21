@@ -1,0 +1,14 @@
+# Core dependencies (kept in sync with pyproject.toml)
+langgraph==1.2.9
+typing-extensions==4.16.0
+pyyaml==6.0.2
+pydantic==2.11.7
+numpy==2.3.2
+faiss-cpu==1.11.0
+sentence-transformers==5.1.0
+requests==2.32.4
+openai==1.109.1
+
+# Baseline runner and tests
+pandas>=2.2,<3.0
+pytest>=8.3,<9.0
