@@ -3,8 +3,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RAW = ROOT / "data" / "raw"
-PROCESSED = ROOT / "data" / "processed"
+RAW = ROOT / "data" / "raw" / "auditoria_desempeno"
+PROCESSED = ROOT / "data" / "processed" / "auditoria_desempeno"
 EVALUATION = ROOT / "data" / "evaluation"
 
 for directory in (RAW, PROCESSED, EVALUATION):
@@ -239,11 +239,94 @@ for case in CASES:
 		}
 	)
 
+AUDIT_SCENARIOS = [
+	"respaldo_completo",
+	"evidencia_incompleta",
+	"calificaciones_discrepantes",
+	"evidencia_desactualizada",
+	"metadatos_insuficientes",
+	"error_de_calculo",
+	"minimizacion_datos_personales",
+	"comparacion_no_sustentada",
+]
+AREAS = ["Desarrollo", "Operaciones", "Ventas", "Administración"]
+
+for employee_number in range(13, 1001):
+	employee_id = f"EMP-AUD-{employee_number:03d}"
+	area = AREAS[(employee_number - 1) % len(AREAS)]
+	scenario = AUDIT_SCENARIOS[(employee_number - 13) % len(AUDIT_SCENARIOS)]
+	objective_count = 4 + employee_number % 5
+	supported_count = objective_count - 2
+	score = 2.5 + (employee_number % 6) * 0.5
+	system_score = score + 0.5 if score < 5.0 else score - 0.5
+
+	evaluation_content = (
+		f"La evaluación de {employee_id} para 2026-S1 asigna "
+		f"{score:.1f}/5 y declara {objective_count} objetivos."
+	)
+	evidence_content = (
+		f"El expediente de {employee_id} contiene registros del periodo 2026-S1. "
+		f"Escenario de auditoría: {scenario}."
+	)
+	audit_content = (
+		f"La auditoría revisó el expediente de {employee_id} para 2026-S1."
+	)
+
+	if scenario == "respaldo_completo":
+		evidence_content += f" Se vincularon los {objective_count} objetivos con registros fechados."
+		audit_content += " La evaluación coincide con la evidencia y no se detectaron cambios sin registrar."
+	elif scenario == "evidencia_incompleta":
+		evidence_content += f" Solo {supported_count} de {objective_count} objetivos tienen evidencia localizada."
+		audit_content += f" Se verificaron {supported_count} objetivos; los restantes quedaron sin respaldo documental."
+	elif scenario == "calificaciones_discrepantes":
+		evidence_content += f" El sistema registra {system_score:.1f}/5, distinto de la evaluación firmada."
+		audit_content += " Se detectaron dos calificaciones y no se halló conciliación para identificar la vigente."
+	elif scenario == "evidencia_desactualizada":
+		evidence_content += " Los registros disponibles terminan el 2026-03-31."
+		audit_content += " No pudo verificarse el desempeño de abril a junio por falta de evidencia reciente."
+	elif scenario == "metadatos_insuficientes":
+		evidence_content += " Los registros no identifican evaluador, versión ni criterio asociado."
+		audit_content += " No fue posible reconstruir la autoría ni vincular la evidencia con los criterios."
+	elif scenario == "error_de_calculo":
+		evidence_content += " Los valores fuente son 80 % y 60 %, cuyo promedio simple es 70 %."
+		audit_content += " La evaluación informa 90 %, aunque el recálculo de la auditoría da 70 %."
+	elif scenario == "minimizacion_datos_personales":
+		evidence_content += " El expediente incluye datos personales sensibles no necesarios para la evaluación."
+		audit_content += " Se observó información no necesaria y acceso más amplio que el requerido; no se reproduce el dato."
+	else:
+		evidence_content += " No incluye resultados comparables de otros empleados ni criterios comunes."
+		audit_content += " La afirmación de comparación global no puede verificarse con los datos disponibles."
+
+	for document_type, document_date, content in (
+		("evaluacion", "2026-06-30", evaluation_content),
+		("evidencia_desempeno", "2026-06-28", evidence_content),
+		("registro_auditoria", "2026-07-02", audit_content),
+	):
+		DOCUMENTS.append(
+			{
+				"document_id": f"AUD-DOC-{len(DOCUMENTS) + 1:03d}",
+				"employee_id": employee_id,
+				"evaluation_period": "2026-S1",
+				"area": area,
+				"document_type": document_type,
+				"document_date": document_date,
+				"content": content,
+				"source_metadata": {
+					"document_type": document_type,
+					"evaluation_period": "2026-S1",
+					"synthetic": True,
+					"source": "auditoria_desempeno_laboral",
+					"audit_scenario": scenario,
+				},
+			}
+		)
+
 
 assert len(CASES) == 12
-assert len(DOCUMENTS) == 36
+assert len(DOCUMENTS) == 3000
 assert len(QUESTIONS) == 12
 assert len({doc["document_id"] for doc in DOCUMENTS}) == len(DOCUMENTS)
+assert len({doc["employee_id"] for doc in DOCUMENTS}) == 1000
 
 document_ids = {doc["document_id"] for doc in DOCUMENTS}
 for question in QUESTIONS:
@@ -267,7 +350,7 @@ for output_path, records in (
 
 print("CORPUS DE AUDITORÍA DE DESEMPEÑO GENERADO")
 print(f"Documentos: {len(DOCUMENTS)}")
-print(f"Expedientes: {len(CASES)}")
+print(f"Expedientes: {len({doc['employee_id'] for doc in DOCUMENTS})}")
 print(f"Preguntas: {len(QUESTIONS)}")
 print(f"RAW: {raw_path}")
 print(f"PROCESSED: {processed_path}")
