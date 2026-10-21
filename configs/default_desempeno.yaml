@@ -1,0 +1,41 @@
+experiment:
+  name: "rag_baseline_dominio"
+  seed: 42
+
+model:
+  provider: "openai_compatible"
+  name: "gpt-4o-mini"
+  base_url: "https://api.openai.com/v1"
+  temperature: 0.0
+  max_tokens: 1024
+
+embeddings:
+  provider: "sentence-transformers"
+  name: "sentence-transformers/all-MiniLM-L6-v2"
+
+retrieval:
+  top_k: 5
+  chunk_size: 500
+  chunk_overlap: 50
+  index_path: "data/processed/auditoria_desempeno/index.faiss"
+  chunks_path: "data/processed/auditoria_desempeno/chunks.jsonl"
+
+pipeline:
+  max_iterations: 8
+
+generation:
+  require_context: true
+  require_citations: true
+  json_output: true
+
+evaluation:
+  questions_path: "data/evaluation/questions_auditoria_desempeno.jsonl"
+  min_questions: 10
+
+paths:
+  data: "data"
+  raw_data: "data/raw/auditoria_desempeno"
+  processed_data: "data/processed/auditoria_desempeno"
+  outputs: "outputs/rag_baseline_dominio"
+  experiments: "experiments"
+  logs: "outputs/rag_baseline_dominio/logs"

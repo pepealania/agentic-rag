@@ -57,6 +57,10 @@ data/processed/*
 !data/raw/corpus_sprint1.jsonl
 !data/processed/corpus_sprint1.jsonl
 
+# Performance-audit corpus
+!data/raw/auditoria_desempeno/
+!data/raw/auditoria_desempeno/corpus_auditoria_desempeno.jsonl
+
 
 # =========================
 # Build / packaging
