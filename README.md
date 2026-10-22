@@ -74,6 +74,13 @@ pip install -e .
 
 The project and its dependencies are installed according to the versions declared in `pyproject.toml`.
 
+To install the full runner and test dependencies listed in `requirements.txt`
+(including `pandas` and `pytest`), run:
+
+```powershell
+pip install -r requirements.txt
+```
+
 ### Linux / macOS
 
 #### 1. Clone the repository
@@ -105,6 +112,12 @@ python -m pip install --upgrade pip
 
 ```bash
 pip install -e .
+```
+
+For the full runner and test dependencies, also install `requirements.txt`:
+
+```bash
+pip install -r requirements.txt
 ```
 
 ## Configuration
@@ -166,6 +179,52 @@ paths:
 
 Parameters should be modified through the configuration file rather than being duplicated throughout the source code.
 
+## Performance-audit corpus
+
+The repository includes a synthetic corpus for auditing information used in
+employee performance evaluations. It contains 3,000 documents covering 1,000
+employee-period records and 12 evaluation questions. The scenarios cover
+traceability, evidence coverage, score conflicts, temporal coverage,
+calculation checks, privacy, version changes, and comparability.
+
+Generate or regenerate the corpus from the repository root:
+
+```powershell
+python experiments\generate_corpus_dominio.py
+```
+
+The generator writes:
+
+- `data/raw/auditoria_desempeno/corpus_auditoria_desempeno.jsonl`
+- `data/processed/auditoria_desempeno/corpus_auditoria_desempeno.jsonl`
+- `data/evaluation/questions_auditoria_desempeno.jsonl`
+
+Run the classic RAG baseline for this corpus from the repository root:
+
+```powershell
+python experiments\run_rag_baseline_dominio.py
+```
+
+The runner reads `configs/default_desempeno.yaml` and writes
+`results.json` and `results.csv` under `outputs/rag_baseline_dominio/`. Set
+`OPENAI_API_KEY` in the shell before running. The FAISS index is built in
+memory for each run; it is not currently persisted to the configured
+`index_path`.
+
+### Audit-rule prototype
+
+`src/agentic_rag/deterministic_workflow_prolog_rules.py` contains a Prolog rule
+catalog for the corpus scenarios. Its `evaluate_corpus_documents()` method
+uses the generator-provided `source_metadata.audit_scenario` label. This is
+useful for evaluating the rule mapping against controlled cases, but it is not
+independent inference from document text; using that label as input would leak
+the expected scenario in an inference evaluation. The engine is not yet wired
+into `DeterministicAgenticRAGWorkflow`.
+
+Running the rules requires SWI-Prolog and PySwip. The rule rationale, source
+mapping, and methodological limits are documented in
+[`docs/fundamento_reglas_auditoria_desempeno.md`](docs/fundamento_reglas_auditoria_desempeno.md).
+
 ## Prolog deterministic workflow
 
 The Prolog-backed workflow reuses the deterministic retrieve, analyze, validate, and finalize graph. In Colab, install SWI-Prolog and the optional Python binding:
@@ -212,21 +271,18 @@ print(result["validation_passed"])
 
 By default, Prolog marks an employee as overloaded with more than three pending tasks and as requiring assistance when at least one task is delayed. The Prolog deductions are passed to the analyst as a citable evidence chunk.
 
-## Running an experiment
+## Running and recording experiments
 
-The executable implementation is located under:
-
-```text
-src/agentic_rag/
-```
-
-From the repository root, with the virtual environment activated, run:
+`agentic_rag.run_experiment` validates a YAML file and creates a directory with
+the configuration and environment metadata. **It does not run retrieval,
+indexing, or answer generation.** From the repository root, run:
 
 ```powershell
 python -m agentic_rag.run_experiment
 ```
 
-A successful execution produces an experiment identifier and a dedicated output directory.
+A successful invocation produces an experiment identifier and a dedicated
+output directory.
 
 Example:
 
@@ -267,6 +323,60 @@ This allows an experiment to be traced back to the parameters that produced its 
 The `environment.json` file records information about the Python interpreter and operating system used during execution.
 
 This provides additional information for reproducing the experiment environment.
+
+### RAG execution entry points
+
+Run the classic baseline with `configs/default.yaml`:
+
+```powershell
+python -m experiments.run_rag_baseline
+```
+
+This runner loads JSONL files recursively from `paths.raw_data`, reads the
+questions from `evaluation.questions_path`, builds a FAISS index in memory,
+and writes `results.json` and `results.csv` to `outputs/rag_baseline/`. The
+index and chunks are not persisted, even though the YAML has `index_path` and
+`chunks_path` fields.
+
+Run the performance-audit baseline with `configs/default_desempeno.yaml`:
+
+```powershell
+python -m experiments.run_rag_baseline_dominio
+```
+
+This runner uses the domain corpus and questions configured there and writes
+results to `outputs/rag_baseline_dominio/`. It reuses the classic baseline
+algorithm; the domain-specific difference is its data, questions, and
+configuration.
+
+The v0.1 benchmark runs the classic baseline and `AgenticRAGWorkflow`:
+
+```powershell
+python -m experiments.run_benchmark_v01
+```
+
+It currently uses `configs/default.yaml` and writes benchmark artifacts to
+`outputs/benchmark_v0.1/`. Its Agentic RAG ingestion path accepts `.txt` and
+`.md` files through `agentic_rag.ingestion`; it does **not** currently ingest
+the performance-audit JSONL corpus. The classic baseline loader accepts JSONL.
+
+### Agentic workflow variants
+
+- `AgenticRAGWorkflow` uses the fixed retrieve → analyze → validate path with
+  rule-based retry/finalize routing. The analyst is LLM-backed; the coordinator
+  does not dynamically plan tools.
+- `DeterministicAgenticRAGWorkflow` uses the same predefined graph and exposes
+  a configurable retry budget. It is implemented, but the current v0.1
+  benchmark does not instantiate it.
+- `AdaptiveAgenticRAGWorkflow` selects retrieve, analyze, validate, retry, or
+  finalize actions from state using `AdaptiveCoordinator` thresholds and
+  validation results. This is state-dependent control, not an LLM planner. It
+  is implemented, but the current benchmark does not instantiate it.
+
+The deterministic Prolog audit-rule prototype is separate from those runners;
+it is not yet wired into `DeterministicAgenticRAGWorkflow`. Its domain
+assumptions and the scenario-label leakage caveat are documented in
+[`docs/fundamento_reglas_auditoria_desempeno.md`](docs/fundamento_reglas_auditoria_desempeno.md).
 
 ## Reproducibility workflow
 
@@ -326,7 +436,8 @@ Install the project and its dependencies with:
 pip install -e .
 ```
 
-Individual dependencies should not need to be installed manually.
+`requirements.txt` also includes runner and test dependencies such as `pandas`
+and `pytest`.
 
 ## Secrets and temporary files
 
@@ -362,6 +473,9 @@ data/processed/
 ```
 
 and are excluded from version control.
+
+The synthetic audit corpus has an explicit exception in `.gitignore` so it can
+be versioned. Check `.gitignore` before adding other local datasets.
 
 ## Development
 
@@ -441,7 +555,13 @@ The current implementation includes:
 - retrieval scores;
 - structured outputs;
 - evidence/citation validation;
-- baseline experiment execution.
+- baseline experiment execution;
+- JSONL loading that requires `document_id` and `content` in each record.
+
+The FAISS index and chunks are held in memory for the run; `index_path` and
+`chunks_path` are not currently used to persist them. The general runner is
+`experiments/run_rag_baseline.py`; the performance-audit runner reuses the
+baseline engine with a domain-specific configuration and inputs.
 
 The main baseline implementation is located in:
 
@@ -450,26 +570,28 @@ src/rag_baseline.py
 ```
 ## 3.3 Deterministic Agentic RAG — 🟡 Implemented
 
-The Deterministic Agentic RAG pipeline extends the baseline RAG system with an explicit, predefined control workflow.
-
-Unlike the baseline pipeline, which performs a fixed retrieval-and-generation process, the deterministic agentic pipeline introduces agentic control decisions while maintaining a fixed execution policy. The sequence of operations and stopping conditions are defined by the experiment configuration and execution logic.
+`DeterministicAgenticRAGWorkflow` is a LangGraph workflow with a predefined
+retrieve → analyze → validate path and bounded, rule-based retry/finalize
+routing. It uses an `EvidenceAgent` and an LLM-backed `AnalystAgent`, but its
+coordinator does not plan tools or actions dynamically. It is a controlled
+workflow variant, not an autonomous planner.
 
 ### Current implementation
 
 The current implementation includes:
 
-- iterative retrieval and answer generation;
-- configurable maximum number of iterations;
-- explicit evaluation of retrieved evidence;
-- deterministic control flow between retrieval and generation steps;
-- evidence-based decision making;
+- bounded retrieval, analysis, and validation;
+- configurable maximum steps and retry budget;
+- explicit, rule-based control flow;
 - document and chunk citations;
 - retrieval scores;
 - structured intermediate and final outputs;
 - evidence/citation validation;
 - experiment-level artifact tracking.
 
-The deterministic workflow is designed to provide a controlled intermediate system between the baseline RAG and the more flexible adaptive agentic architecture.
+The current `run_benchmark_v01.py` does not instantiate this class; it
+instantiates `AgenticRAGWorkflow`. There is not yet a deterministic workflow
+benchmark runner for the performance-audit corpus.
 
 ### Implementation
 
@@ -481,30 +603,30 @@ src/agentic_rag/
 
 ## 3.4 Adaptive Agentic RAG — 🟡 Implemented
 
-The Adaptive Agentic RAG pipeline extends the deterministic agentic workflow by allowing the system to dynamically determine how to proceed based on the state of the current task.
-
-Instead of following a fixed sequence of retrieval iterations, the adaptive pipeline evaluates the available evidence and selects the next action according to the current retrieval and generation state.
+`AdaptiveAgenticRAGWorkflow` uses `AdaptiveCoordinator` to choose the next
+predefined action from current state, evidence counts, validation results, and
+step/retry budgets. The policy is state-dependent, but it is implemented as
+code rules rather than an LLM planner selecting arbitrary tools.
 
 ### Possible actions
 
-Possible actions include:
+Available actions include:
 
 - accepting the current evidence and generating a final answer;
 - performing an additional retrieval step;
-- refining the information need;
-- continuing the reasoning and evidence-gathering process;
-- terminating the workflow when sufficient evidence has been obtained;
-- terminating when the configured iteration limit is reached.
+- retrying retrieval;
+- retrying analysis;
+- finalizing after validation or when a configured budget is exhausted.
 
 ### Current implementation
 
-The current implementation includes:
+The implementation includes:
 
 - iterative retrieval;
 - adaptive control decisions;
-- evidence sufficiency evaluation;
-- configurable iteration limits;
-- dynamic workflow progression;
+- evidence sufficiency thresholds;
+- configurable step and retry limits;
+- state-dependent routing;
 - document and chunk citations;
 - retrieval scores;
 - structured intermediate and final outputs;
@@ -518,3 +640,6 @@ The main implementation is located in:
 ```text
 src/agentic_rag/
 ```
+
+No current experiment runner instantiates `AdaptiveAgenticRAGWorkflow`; the
+v0.1 benchmark uses `AgenticRAGWorkflow` instead.
