@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "agentic-rag"
 version = "0.1.0"
 description = "Reproducible prototype for agentic RAG workflows"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.12,<3.14"
 
 dependencies = [
     "langgraph==1.2.9",
