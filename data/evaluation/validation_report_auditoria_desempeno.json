@@ -1,0 +1,25 @@
+{
+  "total_questions": 100,
+  "verified_questions": 100,
+  "rejected_questions": 0,
+  "questions_without_evidence": 0,
+  "inconsistent_answers": 0,
+  "incorrectly_associated_evidence": 0,
+  "questions_with_answers": 100,
+  "questions_with_evidence": 100,
+  "question_type_distribution": {
+    "busqueda_directa": 1,
+    "deteccion_contradiccion": 11,
+    "integracion_multifuente": 32,
+    "limite_comparabilidad": 10,
+    "resolucion_versiones": 1,
+    "suficiencia_evidencia": 34,
+    "verificacion_calculo": 11
+  },
+  "difficulty_distribution": {
+    "alta": 1,
+    "baja": 17,
+    "media": 82
+  },
+  "validation_issues": []
+}

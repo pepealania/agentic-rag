@@ -1,0 +1,728 @@
+{
+  "total_questions": 100,
+  "verified_questions": 0,
+  "rejected_questions": 0,
+  "pending_questions": 100,
+  "questions_without_evidence": 0,
+  "inconsistent_answers": 0,
+  "incorrectly_associated_evidence": 0,
+  "unsupported_claims": null,
+  "question_type_distribution": {
+    "busqueda_directa": 1,
+    "deteccion_contradiccion": 11,
+    "integracion_multifuente": 32,
+    "limite_comparabilidad": 10,
+    "resolucion_versiones": 1,
+    "suficiencia_evidencia": 34,
+    "verificacion_calculo": 11
+  },
+  "difficulty_distribution": {
+    "alta": 1,
+    "baja": 17,
+    "media": 82
+  },
+  "semantic_judge_enabled": false,
+  "manual_review_status": "pending",
+  "validation_issues": [
+    {
+      "question_id": "QAUD-01",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-02",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-03",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-04",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-05",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-06",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-07",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-08",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-09",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-10",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-11",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-12",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-13",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-14",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-15",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-16",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-17",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-18",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-19",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-20",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-21",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-22",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-23",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-24",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-25",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-26",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-27",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-28",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-29",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-30",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-31",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-32",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-33",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-34",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-35",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-36",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-37",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-38",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-39",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-40",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-41",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-42",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-43",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-44",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-45",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-46",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-47",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-48",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-49",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-50",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-51",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-52",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-53",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-54",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-55",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-56",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-57",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-58",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-59",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-60",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-61",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-62",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-63",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-64",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-65",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-66",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-67",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-68",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-69",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-70",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-71",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-72",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-73",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-74",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-75",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-76",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-77",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-78",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-79",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-80",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-81",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-82",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-83",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-84",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-85",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-86",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-87",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-88",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-89",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-90",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-91",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-92",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-93",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-94",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-95",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-96",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-97",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-98",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-99",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    },
+    {
+      "question_id": "QAUD-100",
+      "decision": "PENDING",
+      "reasons": [
+        "Juez semántico independiente no ejecutado; requiere revisión."
+      ]
+    }
+  ]
+}

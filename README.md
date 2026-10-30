@@ -183,9 +183,37 @@ Parameters should be modified through the configuration file rather than being d
 
 The repository includes a synthetic corpus for auditing information used in
 employee performance evaluations. It contains 3,000 documents covering 1,000
-employee-period records and 12 evaluation questions. The scenarios cover
+employee-period records and 100 evaluation questions. The scenarios cover
 traceability, evidence coverage, score conflicts, temporal coverage,
 calculation checks, privacy, version changes, and comparability.
+
+The generator performs scenario-specific sanity checks. For an independent
+claim-level validation pass, run the semantic validator after generating the
+corpus:
+
+```powershell
+python experiments\validate_corpus_semantics.py
+```
+
+The offline pass checks evidence associations and recalculates supported
+percentages from source indicators. It writes one result per question to
+`data/evaluation/semantic_validation.jsonl` and a summary to
+`data/evaluation/validation_report.json`. Without an LLM judge, questions remain
+pending; deterministic checks alone never mark them as semantically verified.
+
+To enable the independent OpenAI-compatible semantic judge, configure
+`OPENAI_API_KEY` and, if needed, `OPENAI_BASE_URL`, then run:
+
+```powershell
+python experiments\validate_corpus_semantics.py --llm-judge
+```
+
+The judge must enumerate necessary facts, verify their presence in the answer,
+decompose the complete answer into claims, and cite expected document IDs for
+each supported fact and claim. Unreviewed answer text, unsupported claims,
+contradictions, incomplete required facts, and invalid citations prevent
+acceptance. LLM judgments remain automated and do not replace expert human
+review.
 
 Generate or regenerate the corpus from the repository root:
 
