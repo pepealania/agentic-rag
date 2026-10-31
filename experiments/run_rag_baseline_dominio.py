@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.rag_baseline import RAGBaseline, load_domain_config
+from src.rag_baseline_dominio import RAGBaseline, load_domain_config
 
 
 def load_jsonl(path: Path) -> list[dict]:
