@@ -37,5 +37,7 @@ paths:
   raw_data: "data/raw/auditoria_desempeno"
   processed_data: "data/processed/auditoria_desempeno"
   outputs: "outputs/rag_baseline_dominio"
+  agentic_deterministic_outputs: "outputs/rag_agentic_deterministic_dominio"
   experiments: "experiments"
   logs: "outputs/rag_baseline_dominio/logs"
+  agentic_deterministic_logs: "outputs/rag_agentic_deterministic_dominio/logs"
