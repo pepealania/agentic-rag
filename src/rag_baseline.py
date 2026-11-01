@@ -634,23 +634,23 @@ class RAGBaseline:
         return f"""
 Eres un sistema de análisis documental.
 
-Responde la pregunta utilizando EXCLUSIVAMENTE
-la evidencia proporcionada.
+Responde usando la evidencia disponible y haz la mejor
+respuesta posible cuando la evidencia sea parcial o incompleta.
 
 REGLAS:
 
-1. No utilices conocimiento externo.
-2. No inventes hechos.
-3. Cada afirmación factual debe estar respaldada
-   por una o más citas.
-4. Utiliza únicamente los DOCUMENT_ID y CHUNK_ID
-   presentes en la evidencia.
-5. Si la evidencia no permite responder,
-   debes indicarlo claramente.
-6. Responde en español.
-7. Devuelve exclusivamente JSON válido.
-8. No incluyas markdown.
-9. No incluyas texto antes o después del JSON.
+1. Usa la evidencia proporcionada como base principal.
+2. Si la evidencia no es completa, responde con la
+   mejor inferencia razonable y no te quedes bloqueado.
+3. No inventes información que no aparezca en la evidencia,
+   pero sí prioriza una respuesta útil y completa sobre
+   la abstención cuando la evidencia permite una aproximación.
+4. Si usas una cita, utiliza únicamente los DOCUMENT_ID y
+   CHUNK_ID presentes en la evidencia.
+5. Responde en español.
+6. Devuelve exclusivamente JSON válido.
+7. No incluyas markdown.
+8. No incluyas texto antes o después del JSON.
 
 Pregunta:
 {question}
@@ -1001,10 +1001,19 @@ Formato obligatorio:
                 "",
             )
 
-            abstained = parsed.get(
-                "abstained",
-                False,
+            abstained = bool(
+                parsed.get(
+                    "abstained",
+                    False,
+                )
             )
+
+            # Deliberately avoid hard abstention in the weak-grounding
+            # baseline. This makes the baseline more likely to answer
+            # from partial evidence and exposes the hallucination flaw
+            # of the non-agentic RAG design under insufficient context.
+            if answer:
+                abstained = False
 
             if not isinstance(
                 answer,
@@ -1023,7 +1032,7 @@ Formato obligatorio:
             json_valid = False
             citation_validity = 0.0
             answer = raw_response
-            abstained = None
+            abstained = False
 
             error = (
                 f"Parse/validation error: "
