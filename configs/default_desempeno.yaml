@@ -23,6 +23,12 @@ retrieval:
 pipeline:
   max_iterations: 10
 
+adaptive:
+  max_steps: 12
+  max_retries: 2
+  min_evidence: 2
+  sufficient_evidence: 5
+
 generation:
   require_context: false
   require_citations: false
@@ -39,6 +45,7 @@ paths:
   outputs: "outputs/rag_baseline_dominio"
   agentic_deterministic_outputs: "outputs/rag_agentic_deterministic_dominio"
   agentic_deterministic_prolog_outputs: "outputs/rag_agentic_deterministic_dominio_prolog"
+  agentic_adaptive_outputs: "outputs/rag_agentic_adaptive_dominio"
   experiments: "experiments"
   logs: "outputs/rag_baseline_dominio/logs"
   agentic_deterministic_logs: "outputs/rag_agentic_deterministic_dominio/logs"
