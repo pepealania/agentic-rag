@@ -24,8 +24,8 @@ pipeline:
   max_iterations: 8
 
 generation:
-  require_context: true
-  require_citations: true
+  require_context: false
+  require_citations: false
   json_output: true
 
 evaluation:
