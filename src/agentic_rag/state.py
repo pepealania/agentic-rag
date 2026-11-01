@@ -29,9 +29,15 @@ class AgentState(TypedDict, total=False):
 
     question: Question
 
+    employee_id: str
+
+    period_id: str
+
     query_used: str
 
     retrieved_chunks: list[RetrievedChunk]
+
+    prolog_findings: list[dict[str, Any]]
 
     answer: Answer | None
 

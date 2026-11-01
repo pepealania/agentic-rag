@@ -62,7 +62,7 @@ def main() -> None:
     config = load_domain_config()
     corpus_dir = ROOT / config["paths"]["raw_data"]
     questions_path = ROOT / config["evaluation"]["questions_path"]
-    output_dir = ROOT / config["paths"]["agentic_deterministic_outputs"]
+    output_dir = ROOT / config["paths"]["agentic_deterministic_prolog_outputs"]
 
     if not corpus_dir.is_dir():
         raise FileNotFoundError(
@@ -93,6 +93,8 @@ def main() -> None:
         state = workflow.run(
             question["question"],
             question_id=question["question_id"],
+            employee_id=question.get("employee_id"),
+            period_id=question.get("evaluation_period"),
         )
         answer = state.get("answer")
         retrieved_chunks = state.get("retrieved_chunks", [])
@@ -116,6 +118,7 @@ def main() -> None:
             "abstained": answer.abstained if answer else True,
             "validation_passed": state.get("validation_passed", False),
             "validation_errors": state.get("validation_errors", []),
+            "prolog_findings": state.get("prolog_findings", []),
             "query_used": state.get("query_used", ""),
             "retrieved_chunks": [
                 chunk.model_dump(mode="json") for chunk in retrieved_chunks

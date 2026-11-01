@@ -11,7 +11,10 @@ from agentic_rag.analyst import AnalystAgent
 from agentic_rag.embeddings import EmbeddingModel
 from agentic_rag.evidence import EvidenceAgent
 from agentic_rag.retrieval import VectorStore
-from agentic_rag.schemas import Chunk, Question
+from agentic_rag.deterministic_workflow_prolog_rules import (
+    DeterministicWorkflowPrologRules,
+)
+from agentic_rag.schemas import Chunk, Question, RetrievedChunk
 from agentic_rag.state import AgentState
 from agentic_rag.validation import AnswerValidator
 
@@ -44,21 +47,29 @@ class DeterministicDomainAgenticRAGWorkflow:
         evidence_agent: EvidenceAgent | None = None,
         analyst_agent: AnalystAgent | None = None,
         validator: AnswerValidator | None = None,
+        prolog_rules: DeterministicWorkflowPrologRules | None = None,
         max_steps: int = 8,
         max_retries: int = 1,
     ) -> None:
         self.config = config or load_domain_config()
 
-        if max_steps < 4:
+        if max_steps < 5:
             raise ValueError(
-                "max_steps must be at least 4 for retrieve, analyze, validate, "
-                "and finalize."
+            "max_steps must be at least 5 for retrieve, Prolog, analyze, "
+            "validate, and finalize."
             )
         if max_retries < 0:
             raise ValueError("max_retries cannot be negative.")
 
         self.max_steps = max_steps
         self.max_retries = max_retries
+
+        corpus_dir = ROOT / self.config["paths"]["raw_data"]
+        self.corpus_documents = self._load_corpus_documents(corpus_dir)
+        self.prolog_rules = prolog_rules or DeterministicWorkflowPrologRules()
+        self.prolog_corpus_results = self.prolog_rules.evaluate_corpus_documents(
+            self.corpus_documents
+        )["results"]
 
         vector_store = self._build_vector_store()
         self.evidence_agent = evidence_agent or EvidenceAgent(
@@ -83,16 +94,15 @@ class DeterministicDomainAgenticRAGWorkflow:
         )
         vector_store = VectorStore(embedding_model)
 
-        corpus_dir = ROOT / self.config["paths"]["raw_data"]
-        chunks = self._load_corpus_chunks(corpus_dir)
+        chunks = self._load_corpus_chunks()
         vector_store.build(chunks)
         return vector_store
 
-    def _load_corpus_chunks(self, corpus_dir: Path) -> list[Chunk]:
+    def _load_corpus_documents(self, corpus_dir: Path) -> list[dict[str, Any]]:
         if not corpus_dir.exists():
             raise FileNotFoundError(f"Domain corpus directory does not exist: {corpus_dir}")
 
-        chunks: list[Chunk] = []
+        documents: list[dict[str, Any]] = []
         for jsonl_path in sorted(corpus_dir.rglob("*.jsonl")):
             with jsonl_path.open("r", encoding="utf-8") as file:
                 for line_number, line in enumerate(file, start=1):
@@ -110,14 +120,25 @@ class DeterministicDomainAgenticRAGWorkflow:
                     if not isinstance(record, dict):
                         continue
 
-                    text = record.get("content") or record.get("text") or ""
-                    if not text:
-                        continue
+                    record["source"] = record.get("source") or str(jsonl_path)
+                    documents.append(record)
 
-                    document_id = str(record.get("document_id", jsonl_path.stem))
-                    source = str(record.get("source", str(jsonl_path)))
-                    chunk_id = f"{document_id}_chunk_{len(chunks):04d}"
-                    chunks.append(
+        if not documents:
+            raise ValueError(f"No corpus documents were loaded from: {corpus_dir}")
+
+        return documents
+
+    def _load_corpus_chunks(self) -> list[Chunk]:
+        chunks: list[Chunk] = []
+        for document in self.corpus_documents:
+            text = document.get("content") or document.get("text") or ""
+            if not text:
+                continue
+
+            document_id = str(document.get("document_id", "document"))
+            source = str(document.get("source", ""))
+            chunk_id = f"{document_id}_chunk_{len(chunks):04d}"
+            chunks.append(
                         Chunk(
                             chunk_id=chunk_id,
                             document_id=document_id,
@@ -128,7 +149,7 @@ class DeterministicDomainAgenticRAGWorkflow:
                     )
 
         if not chunks:
-            raise ValueError(f"No corpus chunks were loaded from: {corpus_dir}")
+            raise ValueError("No corpus chunks were loaded from the domain corpus.")
 
         return chunks
 
@@ -136,13 +157,15 @@ class DeterministicDomainAgenticRAGWorkflow:
         graph = StateGraph(AgentState)
 
         graph.add_node("retrieve", self.retrieve)
+        graph.add_node("prolog", self.prolog)
         graph.add_node("analyze", self.analyze)
         graph.add_node("validate", self.validate)
         graph.add_node("prepare_retry", self.prepare_retry)
         graph.add_node("finalize", self.finalize)
 
         graph.add_edge(START, "retrieve")
-        graph.add_edge("retrieve", "analyze")
+        graph.add_edge("retrieve", "prolog")
+        graph.add_edge("prolog", "analyze")
         graph.add_edge("analyze", "validate")
         graph.add_conditional_edges(
             "validate",
@@ -156,6 +179,66 @@ class DeterministicDomainAgenticRAGWorkflow:
         graph.add_edge("finalize", END)
 
         return graph.compile()
+
+    def prolog(self, state: AgentState) -> AgentState:
+        employee_id = state.get("employee_id")
+        period_id = state.get("period_id")
+        findings = [
+            finding
+            for finding in self.prolog_corpus_results
+            if finding["employee_id"] == employee_id
+            and finding["period_id"] == period_id
+        ]
+
+        retrieved_chunks = list(state.get("retrieved_chunks", []))
+        if findings:
+            finding_lines = [
+                "Inferencia de reglas Prolog sobre el escenario del expediente:",
+                "Nota metodológica: el escenario procede de source_metadata.audit_scenario.",
+            ]
+            for finding in findings:
+                finding_lines.append(
+                    f"Regla: {finding['rule_id']}; estado: {finding['status']}; "
+                    f"documentos asociados: {', '.join(finding['evidence_ids'])}."
+                )
+
+            retrieved_chunks.append(
+                RetrievedChunk(
+                    chunk_id="prolog_audit_findings",
+                    document_id=f"PROLOG-{employee_id}-{period_id}",
+                    source="prolog://performance-audit/corpus-scenario-rules",
+                    text="\n".join(finding_lines),
+                    chunk_index=len(retrieved_chunks),
+                    score=1.0,
+                )
+            )
+
+        decision_log = list(state.get("decision_log", []))
+        decision_log.append(
+            {
+                "agent": "prolog_performance_audit",
+                "decision": "rules_evaluated",
+                "finding_count": len(findings),
+                "input_provenance": "source_metadata.audit_scenario",
+            }
+        )
+        tool_results = list(state.get("tool_results", []))
+        tool_results.append(
+            {
+                "tool": "prolog_audit_rules",
+                "employee_id": employee_id,
+                "period_id": period_id,
+                "finding_count": len(findings),
+                "input_provenance": "source_metadata.audit_scenario",
+            }
+        )
+
+        return {
+            "prolog_findings": findings,
+            "retrieved_chunks": retrieved_chunks,
+            "decision_log": decision_log,
+            "tool_results": tool_results,
+        }
 
     def _increment_step(self, state: AgentState) -> int:
         step_count = state.get("step_count", 0) + 1
@@ -267,6 +350,8 @@ class DeterministicDomainAgenticRAGWorkflow:
         question: Question | str,
         *,
         question_id: str | None = None,
+        employee_id: str | None = None,
+        period_id: str | None = None,
     ) -> AgentState:
         if isinstance(question, str):
             question_id = question_id or "q_det_001"
@@ -275,8 +360,21 @@ class DeterministicDomainAgenticRAGWorkflow:
                 question=question,
             )
 
+        if period_id is None and employee_id:
+            employee_periods = {
+                str(document["evaluation_period"])
+                for document in self.corpus_documents
+                if document.get("employee_id") == employee_id
+                and document.get("evaluation_period")
+            }
+            if len(employee_periods) == 1:
+                period_id = employee_periods.pop()
+
         state: AgentState = {
             "question": question,
+            "employee_id": employee_id,
+            "period_id": period_id,
+            "prolog_findings": [],
             "retry_count": 0,
             "step_count": 0,
             "max_steps": self.max_steps,

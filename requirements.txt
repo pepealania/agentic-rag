@@ -9,6 +9,9 @@ sentence-transformers==5.1.0
 requests==2.32.4
 openai==1.109.1
 
+# Prolog integration (also requires SWI-Prolog installed separately)
+pyswip>=0.3.2,<0.4
+
 # Baseline runner and tests
 pandas>=2.2,<3.0
 pytest>=8.3,<9.0

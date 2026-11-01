@@ -20,6 +20,9 @@ dependencies = [
     "openai==1.109.1",    
 ]
 
+[project.optional-dependencies]
+prolog = ["pyswip>=0.3.2,<0.4"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

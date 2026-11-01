@@ -246,12 +246,26 @@ catalog for the corpus scenarios. Its `evaluate_corpus_documents()` method
 uses the generator-provided `source_metadata.audit_scenario` label. This is
 useful for evaluating the rule mapping against controlled cases, but it is not
 independent inference from document text; using that label as input would leak
-the expected scenario in an inference evaluation. The engine is not yet wired
-into `DeterministicAgenticRAGWorkflow`.
+the expected scenario in an inference evaluation. The performance-audit domain
+workflow now runs these rules between vector retrieval and analysis, and adds
+the resulting findings as traceable evidence. Its Prolog findings are based on
+the corpus scenario labels, so this is an integration/controlled-scenario
+evaluation, not independent semantic inference from narrative text.
 
 Running the rules requires SWI-Prolog and PySwip. The rule rationale, source
 mapping, and methodological limits are documented in
 [`docs/fundamento_reglas_auditoria_desempeno.md`](docs/fundamento_reglas_auditoria_desempeno.md).
+
+In Colab, install the system runtime and the project's optional Python extra,
+then run the domain-specific Prolog workflow:
+
+```python
+!apt-get update -qq && apt-get install -y -qq swi-prolog
+!pip install -q -e ".[prolog]"
+!python experiments/run_rag_agentic_deterministic_dominio.py
+```
+
+Results are written to `outputs/rag_agentic_deterministic_dominio_prolog`.
 
 ## Prolog deterministic workflow
 

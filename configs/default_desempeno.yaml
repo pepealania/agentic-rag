@@ -21,7 +21,7 @@ retrieval:
   chunks_path: "data/processed/auditoria_desempeno/chunks.jsonl"
 
 pipeline:
-  max_iterations: 8
+  max_iterations: 10
 
 generation:
   require_context: false
@@ -38,6 +38,7 @@ paths:
   processed_data: "data/processed/auditoria_desempeno"
   outputs: "outputs/rag_baseline_dominio"
   agentic_deterministic_outputs: "outputs/rag_agentic_deterministic_dominio"
+  agentic_deterministic_prolog_outputs: "outputs/rag_agentic_deterministic_dominio_prolog"
   experiments: "experiments"
   logs: "outputs/rag_baseline_dominio/logs"
   agentic_deterministic_logs: "outputs/rag_agentic_deterministic_dominio/logs"
