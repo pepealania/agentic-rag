@@ -34,6 +34,30 @@ def load_jsonl(path: Path) -> list[dict]:
     return records
 
 
+def calculate_citation_validity(citations: list[dict], retrieved_chunks: list) -> float:
+    if not citations:
+        return 0.0
+
+    # Extract IDs safely supporting both dictionary objects and class instances
+    retrieved_pairs = set()
+    for chunk in retrieved_chunks:
+        doc_id = getattr(chunk, "document_id", None) or (chunk.get("document_id") if isinstance(chunk, dict) else None)
+        chk_id = getattr(chunk, "chunk_id", None) or (chunk.get("chunk_id") if isinstance(chunk, dict) else None)
+        if doc_id:
+            retrieved_pairs.add((str(doc_id).strip(), str(chk_id).strip() if chk_id else ""))
+
+    valid_count = 0
+    for citation in citations:
+        cit_doc = str(citation.get("document_id", "")).strip()
+        cit_chk = str(citation.get("chunk_id", "")).strip() if citation.get("chunk_id") else ""
+        
+        # Fallback check: matching just document_id if chunk tracking is nested
+        if (cit_doc, cit_chk) in retrieved_pairs or any(cit_doc == p[0] for p in retrieved_pairs):
+            valid_count += 1
+
+    return valid_count / len(citations)
+
+
 def main() -> None:
     config = load_domain_config()
     corpus_dir = ROOT / config["paths"]["raw_data"]
@@ -72,6 +96,10 @@ def main() -> None:
         )
         answer = state.get("answer")
         retrieved_chunks = state.get("retrieved_chunks", [])
+        citations = [
+            citation.model_dump(mode="json")
+            for citation in answer.citations
+        ] if answer else []
         result = {
             "question_id": question["question_id"],
             "question": question["question"],
@@ -79,10 +107,11 @@ def main() -> None:
             "facts": answer.facts if answer else [],
             "indicators": answer.indicators if answer else [],
             "uncertainty": answer.uncertainty if answer else [],
-            "citations": [
-                citation.model_dump(mode="json")
-                for citation in answer.citations
-            ] if answer else [],
+            "citations": citations,
+            "citation_validity": calculate_citation_validity(
+                citations,
+                retrieved_chunks,
+            ),
             "human_review": answer.human_review if answer else True,
             "abstained": answer.abstained if answer else True,
             "validation_passed": state.get("validation_passed", False),
@@ -105,7 +134,7 @@ def main() -> None:
         print(
             question["question_id"],
             "|",
-            result["validation_passed"],
+            result["citation_validity"],
             "|",
             len(result["citations"]),
             "|",
