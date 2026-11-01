@@ -11,6 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.rag_baseline_dominio import RAGBaseline, load_domain_config
+from experiments import domain_qa_helpers as qa
 
 
 def load_jsonl(path: Path) -> list[dict]:
@@ -251,13 +252,13 @@ def main() -> None:
             f"Domain questions file does not exist: {questions_path}"
         )
 
-    questions = select_qa_questions(load_jsonl(questions_path))
+    questions = qa.select_qa_questions(qa.load_jsonl(questions_path))
     if not questions:
         raise ValueError(f"No evaluation questions found in {questions_path}")
 
     print("Selected QA cases:")
     for question in questions:
-        question["paraphrased_question"] = paraphrase_question(question)
+        question["paraphrased_question"] = qa.paraphrase_question(question)
         print(
             question["qa_case"],
             "|",
@@ -287,7 +288,7 @@ def main() -> None:
             ("paraphrase", question["paraphrased_question"]),
         ):
             raw_result = rag.run(question["question_id"], query)
-            result = annotate_result(
+            result = qa.annotate_result(
                 raw_result,
                 question,
                 variant,
@@ -310,37 +311,7 @@ def main() -> None:
                 result["reference_answer_similarity"],
             )
 
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    json_path = output_dir / "results.json"
-    with json_path.open("w", encoding="utf-8") as output_file:
-        json.dump(results, output_file, ensure_ascii=False, indent=2)
-
-    csv_path = output_dir / "results.csv"
-    fieldnames = list(dict.fromkeys(
-        key for result in results for key in result
-    ))
-    with csv_path.open("w", encoding="utf-8", newline="") as output_file:
-        writer = csv.DictWriter(output_file, fieldnames=fieldnames)
-        writer.writeheader()
-        for result in results:
-            writer.writerow(
-                {
-                    key: json.dumps(value, ensure_ascii=False)
-                    if isinstance(value, (dict, list))
-                    else value
-                    for key, value in result.items()
-                }
-            )
-
-    comparison_path = output_dir / "paraphrase_impact.json"
-    comparisons = compare_variants(results)
-    with comparison_path.open("w", encoding="utf-8") as output_file:
-        json.dump(comparisons, output_file, ensure_ascii=False, indent=2)
-
-    print(f"Results JSON: {json_path}")
-    print(f"Results CSV: {csv_path}")
-    print(f"Paraphrase comparison: {comparison_path}")
+    qa.save_qa_results(results, output_dir)
 
 
 if __name__ == "__main__":

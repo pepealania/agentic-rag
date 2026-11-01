@@ -44,6 +44,8 @@ paths:
   processed_data: "data/processed/auditoria_desempeno"
   outputs: "outputs/rag_baseline_dominio"
   baseline_qa_outputs: "outputs/rag_baseline_dominio_qa"
+  agentic_deterministic_qa_outputs: "outputs/rag_agentic_deterministic_dominio_qa"
+  agentic_adaptive_qa_outputs: "outputs/rag_agentic_adaptive_dominio_qa"
   agentic_deterministic_outputs: "outputs/rag_agentic_deterministic_dominio"
   agentic_deterministic_prolog_outputs: "outputs/rag_agentic_deterministic_dominio_prolog"
   agentic_adaptive_outputs: "outputs/rag_agentic_adaptive_dominio"
