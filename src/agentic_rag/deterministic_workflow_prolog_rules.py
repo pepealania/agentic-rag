@@ -134,8 +134,8 @@ class DeterministicWorkflowPrologRules:
 		self._lock = RLock()
 		self._registered_facts: set[str] = set()
 		for rule in PROLOG_RULES:
-			self.prolog.assertz(rule)
-		self.prolog.assertz(CORPUS_SCENARIO_RULE)
+			self.prolog.assertz(rule.removesuffix("."))
+		self.prolog.assertz(CORPUS_SCENARIO_RULE.removesuffix("."))
 		for scenario, rule_id, status, document_types in CORPUS_SCENARIO_RULES:
 			types = ", ".join(self._atom(document_type) for document_type in document_types)
 			self.prolog.assertz(
