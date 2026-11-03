@@ -11,6 +11,33 @@ def test_generate_corpus_dominio_creates_100_questions():
     namespace = runpy.run_path(str(script_path))
 
     assert len(namespace["QUESTIONS"]) == 100
+    assert [question["question_id"] for question in namespace["QUESTIONS"]] == [
+        f"QAUD-{number:02d}" for number in range(1, 101)
+    ]
+
+
+def test_generate_corpus_dominio_classifies_all_three_difficulty_levels():
+    script_path = ROOT / "experiments" / "generate_corpus_dominio.py"
+    namespace = runpy.run_path(str(script_path))
+    questions = namespace["QUESTIONS"]
+
+    assert {question["difficulty"] for question in questions} == {
+        "baja",
+        "media",
+        "alta",
+    }
+    assert all(
+        question["difficulty"] == "alta"
+        for question in questions
+        if question["question_type"] == "integracion_multifuente"
+    )
+    assert namespace["VALIDATION_REPORT"]["question_type_by_difficulty"][
+        "integracion_multifuente"
+    ] == {
+        "alta": namespace["VALIDATION_REPORT"]["question_type_distribution"][
+            "integracion_multifuente"
+        ]
+    }
 
 
 def test_generate_corpus_dominio_tracks_objective_counts_for_incomplete_evidence():

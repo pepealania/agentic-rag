@@ -15,7 +15,7 @@ for directory in (RAW, PROCESSED, EVALUATION):
 
 
 # Synthetic cases designed to audit the information used in employee reviews.
-CASES = [
+INITIAL_SCENARIO_DOCUMENTS = [
 	{
 		"employee_id": "EMP-AUD-001",
 		"area": "Desarrollo",
@@ -25,11 +25,6 @@ CASES = [
 			("evidencia_desempeno", "2026-06-28", "El registro de entregas lista ocho objetivos acordados y ocho entregas aceptadas durante 2026-S1. Cada entrega tiene fecha, responsable y enlace a su registro de proyecto."),
 			("registro_auditoria", "2026-07-02", "La auditoría vinculó la evaluación versión 1 con los ocho registros de entrega. Identificó coincidencia de periodo, empleado y objetivos; no encontró modificaciones posteriores."),
 		],
-		"question": "¿Qué elementos permiten rastrear la calificación de EMP-AUD-001 hasta la evidencia del periodo?",
-		"answer": "La evaluación identifica a EVAL-014, fecha y versión; el registro de auditoría la vincula con ocho entregas fechadas del periodo 2026-S1.",
-		"evidence_types": ["evaluacion", "evidencia_desempeno", "registro_auditoria"],
-		"question_type": "integracion_multifuente",
-		"difficulty": "media",
 	},
 	{
 		"employee_id": "EMP-AUD-002",
@@ -43,11 +38,6 @@ CASES = [
 			("evidencia_desempeno", "2026-06-25", "El expediente contiene seis registros verificables de objetivos cumplidos para EMP-AUD-002. No se localizaron registros de los otros cuatro objetivos mencionados en la evaluación."),
 			("registro_auditoria", "2026-07-03", "La auditoría confirmó seis evidencias vinculables y marcó cuatro objetivos sin respaldo documental. La calificación no incluye una explicación de esta diferencia."),
 		],
-		"question": "¿Cuántos de los diez objetivos de EMP-AUD-002 tienen respaldo documental localizado?",
-		"answer": "Se localizaron seis respaldos; cuatro objetivos mencionados en la evaluación no tienen evidencia localizada.",
-		"evidence_types": ["evidencia_desempeno", "registro_auditoria"],
-		"question_type": "busqueda_directa",
-		"difficulty": "baja",
 	},
 	{
 		"employee_id": "EMP-AUD-003",
@@ -58,11 +48,6 @@ CASES = [
 			("registro_sistema", "2026-06-30", "El sistema de evaluación conserva una calificación de 2.5/5 para EMP-AUD-003 en 2026-S1. El registro no incluye nota que explique la diferencia respecto de la evaluación firmada."),
 			("registro_auditoria", "2026-07-02", "La auditoría detectó dos calificaciones distintas para la misma persona y periodo. No encontró conciliación, aprobación de cambio ni identificación de cuál valor debe considerarse definitivo."),
 		],
-		"question": "¿Qué conclusión permite sostener la auditoría sobre las calificaciones de EMP-AUD-003?",
-		"answer": "Hay una discrepancia entre 4.5/5 en la evaluación firmada y 2.5/5 en el sistema; no hay conciliación que permita elegir una como definitiva.",
-		"evidence_types": ["evaluacion", "registro_sistema", "registro_auditoria"],
-		"question_type": "deteccion_contradiccion",
-		"difficulty": "media",
 	},
 	{
 		"employee_id": "EMP-AUD-004",
@@ -73,11 +58,6 @@ CASES = [
 			("evidencia_desempeno", "2026-03-31", "Los registros de actividad disponibles para EMP-AUD-004 cubren enero, febrero y marzo de 2026. No se adjuntaron registros de abril, mayo ni junio."),
 			("registro_auditoria", "2026-07-04", "La auditoría observó que la evidencia disponible termina el 2026-03-31, aunque la evaluación cubre hasta el 2026-06-30. El estado de los objetivos del segundo trimestre no puede verificarse con este expediente."),
 		],
-		"question": "¿Puede verificarse con este expediente el desempeño de EMP-AUD-004 durante abril-junio?",
-		"answer": "No. La evidencia disponible termina el 31 de marzo y la auditoría no puede verificar el segundo trimestre.",
-		"evidence_types": ["evidencia_desempeno", "registro_auditoria"],
-		"question_type": "suficiencia_evidencia",
-		"difficulty": "baja",
 	},
 	{
 		"employee_id": "EMP-AUD-005",
@@ -88,11 +68,6 @@ CASES = [
 			("evidencia_desempeno", "2026-06-20", "Se adjuntan tres informes de proyecto de EMP-AUD-005, pero ninguno indica a qué criterio de evaluación corresponde."),
 			("registro_auditoria", "2026-07-01", "La auditoría no pudo reconstruir quién aprobó la calificación ni vincular de forma inequívoca los tres informes con los criterios evaluados. Faltan identidad de evaluador, firma y versión del formulario."),
 		],
-		"question": "¿Qué datos faltan para reconstruir la autoría y el fundamento de la evaluación de EMP-AUD-005?",
-		"answer": "Faltan la identidad y firma de quien evaluó, la versión del formulario y la vinculación de cada informe con un criterio.",
-		"evidence_types": ["evaluacion", "evidencia_desempeno", "registro_auditoria"],
-		"question_type": "integracion_multifuente",
-		"difficulty": "media",
 	},
 	{
 		"employee_id": "EMP-AUD-006",
@@ -103,11 +78,6 @@ CASES = [
 			("evidencia_desempeno", "2026-06-28", "Los indicadores registrados son 8 de 10 y 6 de 10. La hoja de cálculo indica que el promedio simple de ambos porcentajes es 90 %."),
 			("registro_auditoria", "2026-07-02", "La auditoría recalculó el promedio simple: (80 % + 60 %) / 2 = 70 %. El 90 % informado no coincide con los valores fuente ni con la fórmula declarada."),
 		],
-		"question": "¿Qué promedio resulta de los dos indicadores de EMP-AUD-006 y qué discrepancia encontró la auditoría?",
-		"answer": "El promedio simple es 70 %; la evaluación informa 90 %, que no coincide con los valores fuente ni con la fórmula declarada.",
-		"evidence_types": ["evaluacion", "evidencia_desempeno", "registro_auditoria"],
-		"question_type": "verificacion_calculo",
-		"difficulty": "media",
 	},
 	{
 		"employee_id": "EMP-AUD-007",
@@ -118,11 +88,6 @@ CASES = [
 			("registro_acceso", "2026-07-01", "El anexo de EMP-AUD-007 estuvo disponible para todos los responsables del área, aunque el expediente de evaluación solo requería acceso de la jefatura y Recursos Humanos."),
 			("registro_auditoria", "2026-07-05", "La auditoría identificó información personal sensible no necesaria para evaluar el desempeño y un alcance de acceso más amplio que el requerido. El informe no reproduce el contenido sensible."),
 		],
-		"question": "¿Qué dos riesgos de manejo de información identificó la auditoría en el expediente de EMP-AUD-007?",
-		"answer": "Se incluyó información personal sensible no necesaria y el anexo tuvo un alcance de acceso mayor al requerido.",
-		"evidence_types": ["evaluacion", "registro_acceso", "registro_auditoria"],
-		"question_type": "integracion_multifuente",
-		"difficulty": "media",
 	},
 	{
 		"employee_id": "EMP-AUD-008",
@@ -133,11 +98,6 @@ CASES = [
 			("historial_versiones", "2026-06-30", "El repositorio conserva una copia anterior de la evaluación de EMP-AUD-008 con calificación 3.0/5 y una copia posterior con 4.0/5. No registra quién realizó el cambio ni su motivo."),
 			("registro_auditoria", "2026-07-03", "La auditoría confirmó el cambio de 3.0/5 a 4.0/5, pero no encontró autor, justificación ni aprobación asociada. No puede determinar si la modificación fue autorizada."),
 		],
-		"question": "¿Qué puede confirmarse y qué permanece sin trazabilidad en el cambio de calificación de EMP-AUD-008?",
-		"answer": "Se confirma un cambio de 3.0/5 a 4.0/5; no constan autor, motivo ni aprobación, por lo que su autorización no puede determinarse.",
-		"evidence_types": ["evaluacion", "historial_versiones", "registro_auditoria"],
-		"question_type": "integracion_multifuente",
-		"difficulty": "alta",
 	},
 	{
 		"employee_id": "EMP-AUD-009",
@@ -148,26 +108,19 @@ CASES = [
 			("evidencia_desempeno", "2026-06-28", "El expediente contiene únicamente métricas individuales de EMP-AUD-009. No incluye resultados de otras personas ni criterios comunes de comparación."),
 			("registro_auditoria", "2026-07-02", "La auditoría no encontró datos comparables del equipo ni un método de clasificación. La afirmación de superioridad global no puede verificarse con la información disponible."),
 		],
-		"question": "¿Está sustentada la afirmación de que EMP-AUD-009 superó a todo el equipo?",
-		"answer": "No. Solo hay métricas individuales y no existe una base comparable ni un método de clasificación del equipo.",
-		"evidence_types": ["evaluacion", "evidencia_desempeno", "registro_auditoria"],
-		"question_type": "suficiencia_evidencia",
-		"difficulty": "media",
 	},
 	{
 		"employee_id": "EMP-AUD-010",
 		"area": "Operaciones",
 		"scenario": "objetivos_parcialmente_respaldados",
+		"objective_count": 3,
+		"supported_count": 2,
+		"unsupported_count": 1,
 		"documents": [
 			("evaluacion", "2026-06-30", "La evaluación de EMP-AUD-010 afirma que cumplió los tres objetivos acordados en 2026-S1."),
 			("evidencia_desempeno", "2026-06-27", "El expediente incluye evidencia verificable para los objetivos OBJ-01 y OBJ-02 de EMP-AUD-010. No se localizó evidencia para OBJ-03."),
 			("registro_auditoria", "2026-07-03", "La auditoría vinculó dos de los tres objetivos con evidencia. El expediente no permite confirmar ni descartar el cumplimiento de OBJ-03."),
 		],
-		"question": "¿Qué parte de la afirmación de cumplimiento de EMP-AUD-010 puede verificarse?",
-		"answer": "Puede verificarse el respaldo de OBJ-01 y OBJ-02; el cumplimiento de OBJ-03 queda sin determinar porque no se localizó evidencia.",
-		"evidence_types": ["evaluacion", "evidencia_desempeno", "registro_auditoria"],
-		"question_type": "suficiencia_evidencia",
-		"difficulty": "media",
 	},
 	{
 		"employee_id": "EMP-AUD-011",
@@ -178,11 +131,6 @@ CASES = [
 			("evaluacion_corregida", "2026-07-05", "La evaluación versión 2 de EMP-AUD-011 asigna 4.0/5, incluye motivo de corrección y firma de la jefatura. El documento está marcado como vigente."),
 			("registro_auditoria", "2026-07-06", "La auditoría verificó que la versión 2 reemplaza a la versión 1, registra la corrección y tiene aprobación de la jefatura. La versión 1 se conserva para trazabilidad, no como resultado vigente."),
 		],
-		"question": "¿Qué calificación debe tratarse como vigente para EMP-AUD-011 y por qué?",
-		"answer": "La calificación vigente es 4.0/5 de la versión 2, aprobada y documentada; la versión 1 de 3.6/5 se conserva como antecedente reemplazado.",
-		"evidence_types": ["evaluacion_corregida", "registro_auditoria"],
-		"question_type": "resolucion_versiones",
-		"difficulty": "media",
 	},
 	{
 		"employee_id": "EMP-AUD-012",
@@ -193,20 +141,13 @@ CASES = [
 			("marco_criterios", "2026-01-15", "El marco de evaluación asigna indicadores diferentes según el rol. No define una escala común ni ponderaciones para comparar resultados entre áreas."),
 			("registro_auditoria", "2026-07-04", "La auditoría concluyó que los datos permiten revisar el expediente de EMP-AUD-012 según sus criterios, pero no establecer una clasificación válida frente a empleados de otras áreas."),
 		],
-		"question": "¿Permite la información comparar globalmente la evaluación de EMP-AUD-012 con empleados de otras áreas?",
-		"answer": "No. Los criterios dependen del rol y no existe una escala común ni ponderaciones para una comparación global válida.",
-		"evidence_types": ["marco_criterios", "registro_auditoria"],
-		"question_type": "limite_comparabilidad",
-		"difficulty": "media",
 	},
 ]
 
 
 DOCUMENTS = []
-QUESTIONS = []
 
-for case in CASES:
-	case_documents = []
+for case in INITIAL_SCENARIO_DOCUMENTS:
 	for document_type, document_date, content in case["documents"]:
 		document_id = f"AUD-DOC-{len(DOCUMENTS) + 1:03d}"
 		document = {
@@ -223,34 +164,18 @@ for case in CASES:
 				"synthetic": True,
 				"source": "auditoria_desempeno_laboral",
 				"audit_scenario": case["scenario"],
+				**{
+					key: case[key]
+					for key in (
+						"objective_count",
+						"supported_count",
+						"unsupported_count",
+					)
+					if key in case
+				},
 			},
 		}
 		DOCUMENTS.append(document)
-		case_documents.append(document)
-
-	evidence_types = set(case["evidence_types"])
-	QUESTIONS.append(
-		{
-			"question_id": f"QAUD-{len(QUESTIONS) + 1:02d}",
-			"employee_id": case["employee_id"],
-			"question": case["question"],
-			"reference_answer": case["answer"],
-			"expected_evidence_ids": [
-				document["document_id"]
-				for document in case_documents
-				if document["document_type"] in evidence_types
-			],
-			"expected_evidence_types": case["evidence_types"],
-			**({
-				"objective_count": case["objective_count"],
-				"supported_count": case["supported_count"],
-				"unsupported_count": case["unsupported_count"],
-			} if "objective_count" in case else {}),
-			"scenario": case["scenario"],
-			"question_type": case["question_type"],
-			"difficulty": case["difficulty"],
-		}
-	)
 
 AUDIT_SCENARIOS = [
 	"respaldo_completo",
@@ -432,6 +357,14 @@ def validate_semantic_question(question, documents_by_id):
 	question_text = question["question"].strip()
 	answer_text = question["reference_answer"].strip()
 	scenario = question["scenario"]
+	expected_question_type = QUESTION_TYPE_BY_SCENARIO[scenario]
+	assert question.get("question_type") == expected_question_type, (
+		f"Tipo de consulta incorrecto para {question.get('question_id')}"
+	)
+	assert question.get("difficulty") == classify_question_difficulty(
+		expected_question_type,
+		scenario,
+	), f"Dificultad incorrecta para {question.get('question_id')}"
 
 	assert question_text, f"Pregunta vacía: {question}"
 	assert answer_text, f"Respuesta vacía: {question}"
@@ -560,6 +493,18 @@ def build_validation_report(questions, documents_by_id):
 	difficulty_distribution = Counter(
 		question.get("difficulty", "sin_clasificar") for question in questions
 	)
+	question_type_by_difficulty = {
+		question_type: dict(
+			sorted(
+				Counter(
+					question.get("difficulty", "sin_clasificar")
+					for question in questions
+					if question.get("question_type") == question_type
+				).items()
+			)
+		)
+		for question_type in sorted(question_type_distribution)
+	}
 	verified_questions = 0
 	rejected_questions = 0
 	questions_without_evidence = 0
@@ -624,19 +569,105 @@ def build_validation_report(questions, documents_by_id):
 		"questions_with_evidence": sum(bool(question.get("expected_evidence_ids")) for question in questions),
 		"question_type_distribution": dict(sorted(question_type_distribution.items())),
 		"difficulty_distribution": dict(sorted(difficulty_distribution.items())),
+		"question_type_by_difficulty": question_type_by_difficulty,
 		"validation_issues": validation_issues,
 	}
 
 
-for employee_number in range(13, 101):
-	employee_id = f"EMP-AUD-{employee_number:03d}"
-	scenario = SCENARIO_BY_EMPLOYEE[employee_number]
-	objective_count = 4 + employee_number % 5
-	supported_count = objective_count - 2
-	score = 2.5 + (employee_number % 6) * 0.5
-	system_score = score + 0.5 if score < 5.0 else score - 0.5
 
-	if scenario == "respaldo_completo":
+QUESTION_TYPE_BY_SCENARIO = {
+	"trazabilidad_completa": "integracion_multifuente",
+	"respaldo_completo": "integracion_multifuente",
+	"evidencia_incompleta": "busqueda_directa",
+	"calificaciones_discrepantes": "deteccion_contradiccion",
+	"evidencia_desactualizada": "suficiencia_evidencia",
+	"metadatos_insuficientes": "integracion_multifuente",
+	"error_de_calculo": "verificacion_calculo",
+	"minimizacion_datos_personales": "integracion_multifuente",
+	"cambio_sin_trazabilidad": "integracion_multifuente",
+	"comparacion_no_sustentada": "suficiencia_evidencia",
+	"objetivos_parcialmente_respaldados": "suficiencia_evidencia",
+	"version_vigente_identificada": "resolucion_versiones",
+	"comparabilidad_limitada": "limite_comparabilidad",
+}
+
+EXPECTED_EVIDENCE_TYPES_BY_SCENARIO = {
+	"trazabilidad_completa": {"evaluacion", "evidencia_desempeno", "registro_auditoria"},
+	"respaldo_completo": {"evaluacion", "evidencia_desempeno", "registro_auditoria"},
+	"evidencia_incompleta": {"evidencia_desempeno", "registro_auditoria"},
+	"calificaciones_discrepantes": {"evaluacion", "registro_sistema", "registro_auditoria"},
+	"evidencia_desactualizada": {"evidencia_desempeno", "registro_auditoria"},
+	"metadatos_insuficientes": {"evaluacion", "evidencia_desempeno", "registro_auditoria"},
+	"error_de_calculo": {"evaluacion", "evidencia_desempeno", "registro_auditoria"},
+	"minimizacion_datos_personales": {"evaluacion", "registro_acceso", "registro_auditoria"},
+	"cambio_sin_trazabilidad": {"evaluacion", "historial_versiones", "registro_auditoria"},
+	"comparacion_no_sustentada": {"evaluacion", "evidencia_desempeno", "registro_auditoria"},
+	"objetivos_parcialmente_respaldados": {"evaluacion", "evidencia_desempeno", "registro_auditoria"},
+	"version_vigente_identificada": {"evaluacion_corregida", "registro_auditoria"},
+	"comparabilidad_limitada": {"marco_criterios", "registro_auditoria"},
+}
+
+
+def classify_question_difficulty(question_type, scenario):
+	if question_type == "integracion_multifuente":
+		return "alta"
+	if question_type == "busqueda_directa":
+		return "baja"
+	if question_type == "suficiencia_evidencia" and scenario in {
+		"evidencia_incompleta",
+		"evidencia_desactualizada",
+	}:
+		return "baja"
+	return "media"
+
+
+def ratings_for_document_type(employee_documents, document_type):
+	text = "\n".join(
+		document["content"]
+		for document in employee_documents
+		if document["document_type"] == document_type
+	)
+	return [float(value) for value in re.findall(r"(\d+(?:\.\d+)?)/5", text)]
+
+
+QUESTIONS = []
+for employee_number in range(1, TARGET_QUESTION_COUNT + 1):
+	employee_id = f"EMP-AUD-{employee_number:03d}"
+	employee_docs = [
+		document
+		for document in DOCUMENTS
+		if document["employee_id"] == employee_id
+	]
+	if not employee_docs:
+		raise ValueError(f"No documents found for question subject {employee_id}")
+
+	if employee_number <= len(INITIAL_SCENARIO_DOCUMENTS):
+		scenario = employee_docs[0]["source_metadata"]["audit_scenario"]
+		metadata = employee_docs[0]["source_metadata"]
+		objective_count = int(metadata.get("objective_count", 0))
+		supported_count = int(metadata.get("supported_count", 0))
+		unsupported_count = int(metadata.get("unsupported_count", 0))
+		score = 2.5
+		system_score = 3.0
+		if scenario == "calificaciones_discrepantes":
+			score = ratings_for_document_type(employee_docs, "evaluacion")[0]
+			system_score = ratings_for_document_type(employee_docs, "registro_sistema")[0]
+		elif scenario == "cambio_sin_trazabilidad":
+			history_scores = ratings_for_document_type(employee_docs, "historial_versiones")
+			system_score, score = history_scores[0], history_scores[-1]
+		elif scenario == "version_vigente_identificada":
+			system_score = ratings_for_document_type(employee_docs, "evaluacion")[0]
+			score = ratings_for_document_type(employee_docs, "evaluacion_corregida")[0]
+	else:
+		scenario = SCENARIO_BY_EMPLOYEE[employee_number]
+		metadata = employee_docs[0]["source_metadata"]
+		objective_count = int(metadata.get("objective_count", 4 + employee_number % 5))
+		supported_count = int(metadata.get("supported_count", objective_count - 2))
+		unsupported_count = int(metadata.get("unsupported_count", objective_count - supported_count))
+		score = 2.5 + (employee_number % 6) * 0.5
+		system_score = score + 0.5 if score < 5.0 else score - 0.5
+
+	if scenario in {"respaldo_completo", "trazabilidad_completa"}:
 		question = (
 			f"¿Qué evidencia permite verificar el desempeño de {employee_id} "
 			"durante 2026-S1?"
@@ -736,8 +767,13 @@ for employee_number in range(13, 101):
 			"comparativa común para una clasificación global válida."
 		)
 
-	employee_docs = [
-		doc for doc in DOCUMENTS if doc["employee_id"] == employee_id
+	question_type = QUESTION_TYPE_BY_SCENARIO[scenario]
+	difficulty = classify_question_difficulty(question_type, scenario)
+	expected_evidence_types = EXPECTED_EVIDENCE_TYPES_BY_SCENARIO[scenario]
+	expected_documents = [
+		doc
+		for doc in employee_docs
+		if doc["document_type"] in expected_evidence_types
 	]
 	QUESTIONS.append(
 		{
@@ -746,31 +782,21 @@ for employee_number in range(13, 101):
 			"question": question,
 			"reference_answer": answer,
 			"expected_evidence_ids": [
-				doc["document_id"] for doc in employee_docs
+				doc["document_id"] for doc in expected_documents
 			],
-			"expected_evidence_types": [
-				doc["document_type"] for doc in employee_docs
-			],
-			"objective_count": objective_count,
-			"supported_count": supported_count,
-			"unsupported_count": objective_count - supported_count,
+			"expected_evidence_types": sorted(expected_evidence_types),
+			**({
+				"objective_count": objective_count,
+				"supported_count": supported_count,
+				"unsupported_count": unsupported_count,
+			} if objective_count else {}),
 			"scenario": scenario,
-			"question_type": (
-				"integracion_multifuente"
-				if scenario in {"respaldo_completo", "metadatos_insuficientes", "minimizacion_datos_personales", "cambio_sin_trazabilidad", "version_vigente_identificada"}
-				else "suficiencia_evidencia"
-				if scenario in {"evidencia_incompleta", "evidencia_desactualizada", "comparacion_no_sustentada", "objetivos_parcialmente_respaldados"}
-				else "deteccion_contradiccion"
-				if scenario == "calificaciones_discrepantes"
-				else "verificacion_calculo"
-				if scenario == "error_de_calculo"
-				else "limite_comparabilidad"
-			),
-			"difficulty": "media" if scenario in {"respaldo_completo", "metadatos_insuficientes", "calificaciones_discrepantes", "comparacion_no_sustentada", "cambio_sin_trazabilidad", "version_vigente_identificada"} else "baja" if scenario in {"evidencia_incompleta", "evidencia_desactualizada"} else "media",
+			"question_type": question_type,
+			"difficulty": difficulty,
 		}
 	)
 
-assert len(CASES) == 12
+assert len(INITIAL_SCENARIO_DOCUMENTS) == 12
 assert len(DOCUMENTS) == 3000
 assert len(QUESTIONS) == TARGET_QUESTION_COUNT
 assert len({doc["document_id"] for doc in DOCUMENTS}) == len(DOCUMENTS)
@@ -804,6 +830,12 @@ for question_type, count in VALIDATION_REPORT["question_type_distribution"].item
 print("\nPor nivel de dificultad:")
 for difficulty, count in VALIDATION_REPORT["difficulty_distribution"].items():
 	print(f"{difficulty}: {count}")
+
+print("\nPor tipo y nivel de dificultad:")
+for question_type, difficulty_counts in VALIDATION_REPORT[
+	"question_type_by_difficulty"
+].items():
+	print(f"{question_type}: {difficulty_counts}")
 
 print("\nTOTAL:")
 print(f"Preguntas: {VALIDATION_REPORT['total_questions']}")

@@ -8,18 +8,42 @@
   "questions_with_answers": 100,
   "questions_with_evidence": 100,
   "question_type_distribution": {
-    "busqueda_directa": 1,
+    "busqueda_directa": 6,
     "deteccion_contradiccion": 11,
-    "integracion_multifuente": 32,
+    "integracion_multifuente": 28,
     "limite_comparabilidad": 10,
-    "resolucion_versiones": 1,
-    "suficiencia_evidencia": 34,
+    "resolucion_versiones": 5,
+    "suficiencia_evidencia": 29,
     "verificacion_calculo": 11
   },
   "difficulty_distribution": {
-    "alta": 1,
+    "alta": 28,
     "baja": 17,
-    "media": 82
+    "media": 55
+  },
+  "question_type_by_difficulty": {
+    "busqueda_directa": {
+      "baja": 6
+    },
+    "deteccion_contradiccion": {
+      "media": 11
+    },
+    "integracion_multifuente": {
+      "alta": 28
+    },
+    "limite_comparabilidad": {
+      "media": 10
+    },
+    "resolucion_versiones": {
+      "media": 5
+    },
+    "suficiencia_evidencia": {
+      "baja": 11,
+      "media": 18
+    },
+    "verificacion_calculo": {
+      "media": 11
+    }
   },
   "validation_issues": []
 }
