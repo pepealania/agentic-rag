@@ -19,6 +19,7 @@ def load_jsonl(path: Path) -> list[dict]:
 
 
 def select_qa_questions(questions: list[dict]) -> list[dict]:
+    questions_per_case = 3
     case_specs = (
         (
             "easy",
@@ -40,21 +41,21 @@ def select_qa_questions(questions: list[dict]) -> list[dict]:
     selected = []
     selected_ids = set()
     for case_name, matches in case_specs:
-        question = next(
-            (
-                candidate
-                for candidate in questions
-                if candidate.get("question_id") not in selected_ids
-                and matches(candidate)
-            ),
-            None,
-        )
-        if question is None:
+        candidates = [
+            candidate
+            for candidate in questions
+            if candidate.get("question_id") not in selected_ids
+            and matches(candidate)
+        ][:questions_per_case]
+        if len(candidates) < questions_per_case:
             raise ValueError(
-                f"Evaluation set has no question matching QA case: {case_name}"
+                f"Evaluation set has only {len(candidates)} questions for QA case "
+                f"{case_name}; expected {questions_per_case}."
             )
-        selected_ids.add(question["question_id"])
-        selected.append({**question, "qa_case": case_name})
+
+        for question in candidates:
+            selected_ids.add(question["question_id"])
+            selected.append({**question, "qa_case": case_name})
     return selected
 
 

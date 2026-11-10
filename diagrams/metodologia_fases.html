@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagrama Compacto de Arquitectura RAG</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #f4f5f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 15px;
+      font-family: "Latin Modern Roman", "Computer Modern", "Times New Roman", Georgia, serif;
+    }
+
+    /* Contenedor optimizado para ocupar el ancho A4 con mínima altura */
+    .diagram-wrapper {
+      width: 185mm; /* Ancho útil de una hoja A4 */
+      background-color: #ffffff;
+      padding: 8mm 6mm;
+      border: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Estilo base de las cajas */
+    .node {
+      border: 1.3pt solid #111111;
+      border-radius: 7px;
+      background-color: #ffffff;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 8px 10px;
+    }
+
+    .node-title {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #000000;
+      line-height: 1.2;
+      margin-bottom: 3px;
+    }
+
+    .node-subtitle {
+      font-size: 9pt;
+      font-weight: 400;
+      color: #1a1a1a;
+      line-height: 1.2;
+    }
+
+    /* Fila 1: Pasos 1, 2 y 3 horizontales */
+    .top-sequence {
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+    }
+
+    .node-step {
+      flex: 1;
+      min-height: 19mm;
+    }
+
+    /* Flechas horizontales entre 1 -> 2 -> 3 */
+    .arrow-h {
+      width: 9mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Fila 2: Las 3 arquitecturas paralelas */
+    .branches-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      gap: 9mm;
+    }
+
+    .node-branch {
+      flex: 1;
+      min-height: 13mm;
+      padding: 7px 8px;
+    }
+
+    .node-branch .node-title {
+      margin-bottom: 0;
+    }
+
+    /* Fila 3: Evaluación y Consolidación en bloque inferior */
+    .bottom-row {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+    }
+
+    .node-bottom {
+      width: 78mm;
+      min-height: 17mm;
+    }
+
+    /* Conectores SVG compactos */
+    .svg-connector {
+      width: 100%;
+      height: 10mm;
+      display: block;
+    }
+
+    @media print {
+      body {
+        background: none;
+        padding: 0;
+      }
+      .diagram-wrapper {
+        border: none;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="diagram-wrapper">
+    
+    <!-- FILA SUPERIOR: Pasos 1, 2 y 3 en secuencia horizontal -->
+    <div class="top-sequence">
+      <div class="node node-step">
+        <div class="node-title">1. Generación del corpus</div>
+        <div class="node-subtitle">Diseño paramétrico y casos de auditoría</div>
+      </div>
+
+      <div class="arrow-h">
+        <svg width="100%" height="14" viewBox="0 0 24 14">
+          <line x1="0" y1="7" x2="18" y2="7" stroke="#111111" stroke-width="1.4" />
+          <polygon points="17,3.5 24,7 17,10.5" fill="#111111" />
+        </svg>
+      </div>
+
+      <div class="node node-step">
+        <div class="node-title">2. Preparación documental</div>
+        <div class="node-subtitle">Validación estructural y segmentación</div>
+      </div>
+
+      <div class="arrow-h">
+        <svg width="100%" height="14" viewBox="0 0 24 14">
+          <line x1="0" y1="7" x2="18" y2="7" stroke="#111111" stroke-width="1.4" />
+          <polygon points="17,3.5 24,7 17,10.5" fill="#111111" />
+        </svg>
+      </div>
+
+      <div class="node node-step">
+        <div class="node-title">3. Construcción del índice</div>
+        <div class="node-subtitle">Representación vectorial y base empírica</div>
+      </div>
+    </div>
+
+    <!-- CONECTOR: Desde el Paso 3 (derecha) hacia las 3 arquitecturas -->
+    <svg class="svg-connector" viewBox="0 0 185 10" preserveAspectRatio="none">
+      <!-- Baja desde el centro del nodo 3 (x=157.5) hasta la línea distribuidora (y=5) -->
+      <line x1="157.5" y1="0" x2="157.5" y2="5" stroke="#111111" stroke-width="0.45" />
+      <!-- Barra horizontal distribuidora -->
+      <line x1="27.5" y1="5" x2="157.5" y2="5" stroke="#111111" stroke-width="0.45" />
+      <!-- Bajadas hacia cada rama -->
+      <line x1="27.5" y1="5" x2="27.5" y2="10" stroke="#111111" stroke-width="0.45" />
+      <line x1="92.5" y1="5" x2="92.5" y2="10" stroke="#111111" stroke-width="0.45" />
+      <line x1="157.5" y1="5" x2="157.5" y2="10" stroke="#111111" stroke-width="0.45" />
+    </svg>
+
+    <!-- FILA MEDIA: 3 Arquitecturas RAG -->
+    <div class="branches-row">
+      <div class="node node-branch">
+        <div class="node-title">RAG convencional</div>
+      </div>
+
+      <div class="node node-branch">
+        <div class="node-title">Agentic RAG determinista</div>
+      </div>
+
+      <div class="node node-branch">
+        <div class="node-title">Agentic RAG adaptativo</div>
+      </div>
+    </div>
+
+    <!-- CONECTOR: Convergencia hacia Evaluación y validación -->
+    <svg class="svg-connector" viewBox="0 0 185 10" preserveAspectRatio="none">
+      <!-- Bajadas desde cada arquitectura hasta y=5 -->
+      <line x1="27.5" y1="0" x2="27.5" y2="5" stroke="#111111" stroke-width="0.45" />
+      <line x1="92.5" y1="0" x2="92.5" y2="10" stroke="#111111" stroke-width="0.45" />
+      <line x1="157.5" y1="0" x2="157.5" y2="5" stroke="#111111" stroke-width="0.45" />
+      <!-- Barra horizontal de unión -->
+      <line x1="27.5" y1="5" x2="157.5" y2="5" stroke="#111111" stroke-width="0.45" />
+    </svg>
+
+    <!-- FILA INFERIOR: Evaluación y Consolidación lado a lado para ahorrar altura -->
+    <div class="bottom-row">
+      <div class="node node-bottom">
+        <div class="node-title">Evaluación y validación</div>
+        <div class="node-subtitle">Análisis de exactitud, fundamentación y eficiencia</div>
+      </div>
+
+      <div class="arrow-h">
+        <svg width="100%" height="14" viewBox="0 0 24 14">
+          <line x1="0" y1="7" x2="18" y2="7" stroke="#111111" stroke-width="1.4" />
+          <polygon points="17,3.5 24,7 17,10.5" fill="#111111" />
+        </svg>
+      </div>
+
+      <div class="node node-bottom">
+        <div class="node-title">Consolidación de resultados</div>
+        <div class="node-subtitle">Análisis estadístico y comparación de arquitecturas</div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

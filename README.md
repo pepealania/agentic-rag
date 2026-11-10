@@ -239,6 +239,53 @@ The runner reads `configs/default_desempeno.yaml` and writes
 memory for each run; it is not currently persisted to the configured
 `index_path`.
 
+### Comparing the domain RAG configurations
+
+The three domain runners fit the supplied architecture taxonomy as follows.
+The architecture labels are not mutually exclusive: the adaptive workflow is
+both agentic in its use of cooperating components and adaptive in its
+state-dependent control.
+
+| Configuration | Architecture from the taxonomy | Determinism classification | Why it fits | Related reference(s) from the bibliography |
+|---|---|---|---|---|
+| Baseline (`run_rag_baseline_dominio.py`) | **1. Naive RAG** | **H** | Uses fixed dense retrieval followed by LLM answer generation. Retrieval is a separate stage that supplies context to generation; it is not itself the analysis step. | [Lewis et al. (2020), “Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks”](https://proceedings.neurips.cc/paper/2020/hash/6b493230205f780e1bc26945df7481e5-Abstract.html) |
+| Deterministic agentic (`run_rag_agentic_deterministic_dominio.py`) | **6. Agentic RAG** — constrained deterministic agents | **H** | Uses dense retrieval, then predefined Prolog → analyze → validate steps, with rule-based retry/finalize routing. The analyst performs the LLM-based analysis using retrieved evidence. | [LangGraph, “Workflows and Agents” (2026)](https://docs.langchain.com/oss/python/langgraph/workflows-agents); [Liang et al. (2025), “Reasoning RAG via System 1 or System 2”](https://aclanthology.org/2025.findings-ijcnlp.122/) |
+| Adaptive agentic (`run_rag_agentic_adaptive_dominio.py`) | **7. Adaptive RAG** — rule-based adaptation; also **6. Agentic RAG** — constrained agents | **H** | Uses dense retrieval and a coordinator that selects predefined actions based on workflow state, evidence, validation, and step/retry limits. The analyst performs LLM-based analysis; retrieval is a separate stage, and the coordinator is not an autonomous LLM planner. | [LangGraph, “Workflows and Agents” (2026)](https://docs.langchain.com/oss/python/langgraph/workflows-agents); [Liang et al. (2025), “Reasoning RAG via System 1 or System 2”](https://aclanthology.org/2025.findings-ijcnlp.122/) |
+
+These are related conceptual references from the supplied bibliography; they
+do not necessarily define this exact taxonomy or describe these
+implementations. The architecture assignments above are based on the
+implemented behavior of the project runners.
+
+All three runners use dense retrieval: the configured
+`sentence-transformers/all-MiniLM-L6-v2` embedding model converts corpus
+chunks and the query into dense vectors, then FAISS finds the most similar
+vectors and returns their associated chunks. This is the retrieval stage, not
+the analysis stage; the retrieved evidence is passed to the answer-generation
+or analyst component. Their chunking and retrieval implementations are not
+fully controlled to be identical:
+
+- The baseline (`run_rag_baseline_dominio.py`) splits each document's content
+  into word-based chunks using `retrieval.chunk_size` and
+  `retrieval.chunk_overlap` (500 words and 50 words in
+  `default_desempeno.yaml`), then embeds and retrieves those chunks in
+  `src/rag_baseline.py`.
+- The deterministic runner (`run_rag_agentic_deterministic_dominio.py`) and
+  adaptive runner (`run_rag_agentic_adaptive_dominio.py`) use the shared
+  `src/agentic_rag/embeddings.py` and `src/agentic_rag/retrieval.py`
+  components. In these domain runners, each non-empty JSONL corpus record is
+  treated as one chunk; they do not apply the baseline's word-based splitter.
+- The deterministic workflow additionally evaluates Prolog audit rules and
+  supplies their findings as evidence. The adaptive workflow may perform
+  additional retrieval or analysis attempts according to its coordinator.
+
+Consequently, embedding and retrieval are common stages in the broad
+experimental design, but chunk boundaries, indexed content, and workflow
+behavior differ. Comparisons across these runners should not be described as
+isolating only the effect of deterministic versus adaptive control. A more
+controlled comparison should first align chunking and confirm that the same
+corpus, embedding model, `top_k`, and retrieved evidence are used.
+
 ### Audit-rule prototype
 
 `src/agentic_rag/deterministic_workflow_prolog_rules.py` contains a Prolog rule
@@ -563,7 +610,10 @@ The project is developed in the following stages:
 4. Experimental evaluation.
 5. Comparison and analysis.
 
-The baseline RAG is implemented independently from the agentic workflow so that the contribution of the agentic components can be evaluated against a controlled reference.
+The baseline RAG is implemented independently from the agentic workflows. It
+provides a reference system, but comparisons are controlled only for factors
+that are explicitly aligned; see [Comparing the domain RAG
+configurations](#comparing-the-domain-rag-configurations).
 
 ## Current status
 
@@ -631,9 +681,9 @@ The current implementation includes:
 - evidence/citation validation;
 - experiment-level artifact tracking.
 
-The current `run_benchmark_v01.py` does not instantiate this class; it
-instantiates `AgenticRAGWorkflow`. There is not yet a deterministic workflow
-benchmark runner for the performance-audit corpus.
+The v0.1 benchmark runner does not instantiate this domain-specific class; it
+instantiates `AgenticRAGWorkflow`. The performance-audit domain has a separate
+runner at `experiments/run_rag_agentic_deterministic_dominio.py`.
 
 ### Implementation
 
@@ -683,5 +733,6 @@ The main implementation is located in:
 src/agentic_rag/
 ```
 
-No current experiment runner instantiates `AdaptiveAgenticRAGWorkflow`; the
-v0.1 benchmark uses `AgenticRAGWorkflow` instead.
+The performance-audit domain runner at
+`experiments/run_rag_agentic_adaptive_dominio.py` instantiates this workflow.
+The v0.1 benchmark uses `AgenticRAGWorkflow` instead.
