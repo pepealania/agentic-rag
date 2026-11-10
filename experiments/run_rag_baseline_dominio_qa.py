@@ -311,6 +311,7 @@ def main() -> None:
                 "|",
                 result["reference_answer_similarity"],
             )
+            print("  Answer:", result.get("answer", ""))
 
     qa.save_qa_results(results, output_dir)
 

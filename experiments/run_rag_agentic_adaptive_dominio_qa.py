@@ -260,6 +260,7 @@ def main() -> None:
                 "|",
                 result["retry_count"],
             )
+            print("  Answer:", result.get("answer", ""))
 
     qa.save_qa_results(results, output_dir)
 
