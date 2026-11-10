@@ -19,66 +19,87 @@ def load_jsonl(path: Path) -> list[dict]:
 
 
 def select_qa_questions(questions: list[dict]) -> list[dict]:
-    questions_per_case = 3
-    case_specs = (
-        (
-            "easy",
-            lambda question: question.get("difficulty") == "baja"
-            and question.get("question_type") == "busqueda_directa",
-        ),
-        (
-            "medium",
-            lambda question: question.get("difficulty") == "media"
-            and question.get("question_type") == "resolucion_versiones",
-        ),
-        (
-            "multihop",
-            lambda question: question.get("question_type") == "integracion_multifuente"
-            and len(question.get("expected_evidence_ids", [])) >= 3,
-        ),
+    case_question_ids = (
+        ("direct_answer", ("QAUD-02", "QAUD-04", "QAUD-11")),
+        ("analysis", ("QAUD-03", "QAUD-06", "QAUD-12")),
+        ("multihop", ("QAUD-01", "QAUD-05", "QAUD-07")),
     )
+    questions_by_id = {}
+    for question in questions:
+        question_id = question.get("question_id")
+        if question_id in questions_by_id:
+            raise ValueError(f"Duplicate evaluation question ID: {question_id}")
+        questions_by_id[question_id] = question
 
     selected = []
-    selected_ids = set()
-    for case_name, matches in case_specs:
-        candidates = [
-            candidate
-            for candidate in questions
-            if candidate.get("question_id") not in selected_ids
-            and matches(candidate)
-        ][:questions_per_case]
-        if len(candidates) < questions_per_case:
+    for case_name, question_ids in case_question_ids:
+        missing_ids = [
+            question_id
+            for question_id in question_ids
+            if question_id not in questions_by_id
+        ]
+        if missing_ids:
             raise ValueError(
-                f"Evaluation set has only {len(candidates)} questions for QA case "
-                f"{case_name}; expected {questions_per_case}."
+                f"Evaluation set is missing questions for QA case {case_name}: "
+                f"{', '.join(missing_ids)}."
             )
 
-        for question in candidates:
-            selected_ids.add(question["question_id"])
-            selected.append({**question, "qa_case": case_name})
+        selected.extend(
+            {
+                **questions_by_id[question_id],
+                "qa_case": case_name,
+            }
+            for question_id in question_ids
+        )
     return selected
 
 
 def paraphrase_question(question: dict) -> str:
-    employee_id = question["employee_id"]
-    case_name = question["qa_case"]
-    if case_name == "easy":
-        objective_count = question.get("objective_count", 10)
-        return (
-            f"De los {objective_count} objetivos atribuidos a {employee_id}, "
-            "¿cuántos cuentan con evidencia documental localizada?"
-        )
-    if case_name == "medium":
-        return (
-            f"¿Cuál es la versión y calificación vigente de la evaluación de "
-            f"{employee_id}, y qué evidencia permite confirmarlo?"
-        )
-    if case_name == "multihop":
-        return (
-            f"¿Cómo puede reconstruirse el vínculo entre la calificación de "
-            f"{employee_id}, su evaluación y la evidencia correspondiente al periodo?"
-        )
-    raise ValueError(f"Unsupported QA case for paraphrasing: {case_name}")
+    paraphrases = {
+        "QAUD-02": (
+            "Al revisar el expediente de EMP-AUD-002, ¿para cuántos objetivos "
+            "se encontró respaldo documental?"
+        ),
+        "QAUD-04": (
+            "¿Qué meses del segundo trimestre de 2026 quedan sin comprobar "
+            "en el expediente de EMP-AUD-004?"
+        ),
+        "QAUD-11": (
+            "El expediente de EMP-AUD-011 contiene varias versiones: "
+            "¿cuál quedó aprobada y qué nota recibió?"
+        ),
+        "QAUD-03": (
+            "¿Coinciden la nota de la evaluación y la del sistema para "
+            "EMP-AUD-003? Indica los valores y si fueron conciliados."
+        ),
+        "QAUD-06": (
+            "Al recalcular los indicadores de EMP-AUD-006, ¿qué promedio se "
+            "obtiene y por qué difiere del 90% informado?"
+        ),
+        "QAUD-12": (
+            "¿Es válido comparar la evaluación de EMP-AUD-012 con las de otras "
+            "áreas, o faltan criterios comunes para hacerlo?"
+        ),
+        "QAUD-01": (
+            "Para comprobar el desempeño de EMP-AUD-001 en 2026-S1, ¿cómo "
+            "se corroboran entre sí la evaluación, las entregas y la auditoría?"
+        ),
+        "QAUD-05": (
+            "¿Qué información habría que recuperar para reconstruir quién "
+            "evaluó a EMP-AUD-005 y con qué criterios se respaldó la nota?"
+        ),
+        "QAUD-07": (
+            "¿Qué problemas de privacidad y de permisos de acceso encontró "
+            "la auditoría en el expediente de EMP-AUD-007?"
+        ),
+    }
+    question_id = question.get("question_id")
+    try:
+        return paraphrases[question_id]
+    except KeyError as error:
+        raise ValueError(
+            f"No paraphrase is defined for question {question_id!r}."
+        ) from error
 
 
 def _field(item, key: str):
