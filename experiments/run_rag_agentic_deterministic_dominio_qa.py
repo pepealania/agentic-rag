@@ -82,6 +82,20 @@ def main() -> None:
     for question in questions:
         question["paraphrased_question"] = qa.paraphrase_question(question)
 
+    print("Selected QA cases:")
+    for question in questions:
+        print(
+            question["qa_case"],
+            "|",
+            question["question_id"],
+            "|",
+            question.get("difficulty", ""),
+            "|",
+            question.get("question_type", ""),
+        )
+        print("  Original:", question["question"])
+        print("  Paraphrase:", question["paraphrased_question"])
+
     pipeline_config = config.get("pipeline", {})
     workflow = DeterministicDomainAgenticRAGWorkflow(
         config=config,

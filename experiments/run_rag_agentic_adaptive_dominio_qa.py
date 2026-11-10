@@ -181,6 +181,7 @@ def main() -> None:
             "|",
             question.get("question_type", ""),
         )
+        print("  Original:", question["question"])
         print("  Paraphrase:", question["paraphrased_question"])
 
     results = []
