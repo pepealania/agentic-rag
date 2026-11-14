@@ -1,0 +1,36 @@
+\chapter{Conclusiones y trabajos futuros}
+\label{ch:conclusiones_trabajos_futuros}
+
+\section{Conclusiones principales}
+\label{sec:conclusiones_principales}
+El desarrollo y la evaluación empírica de esta investigación permiten consolidar conclusiones de alto valor metrológico y teórico sobre la aplicación de sistemas de recuperación y generación (RAG) en auditorías de desempeño laboral:
+
+\begin{itemize}
+    \item \textbf{Inviabilidad operativa del RAG clásico (Baseline):} Se demuestra empíricamente que la arquitectura RAG convencional basada en un solo paso (\textit{single-shot}) \cite{lewis2020rag} es inviable para tareas de auditoría de información crítica. Aunque exhibe la latencia promedio más baja (1.70~s), su vulnerabilidad sistémica resulta en una tasa de alucinación real del 56.8\% (con una validez de citas de apenas el 43.2\% y un F1-Score de coincidencia de evidencias del 0.0\% debido al arrastre estático). Estos hallazgos validan de manera categórica las hipótesis de \cite{ji2023survey} sobre el riesgo endémico de alucinación semántica en modelos autorregresivos desprovistos de marcos de supervisión activa.
+
+    \item \textbf{La eficacia del control lógico determinista (Prolog):} La integración de un motor deductivo formal mediante Prolog (SWI-Prolog) \cite{wielemaker2012swi, clocksin2003programming} en la arquitectura \textbf{Agentic Deterministic} se consagra como la salvaguarda matemática más eficiente para restringir el comportamiento del LLM. Al someter las unificaciones sintácticas a lógica de primer orden \cite{lloyd1987foundations}, se reduce drásticamente el error de alucinación al 26.0\% en respuestas válidas. No obstante, esta consistencia restrictiva induce un \textit{trade-off} de rigidez lingüística, forzando al sistema a incurrir en una tasa de abstención del 34.0\% ante variaciones léxicas informales.
+
+    \item \textbf{La superioridad del enfoque adaptativo multi-agente:} La arquitectura \textbf{Agentic Adaptive} demuestra un desempeño óptimo y flexible en el manejo de incertidumbre. Mediante enrutadores adaptativos, validaciones semánticas recursivas \cite{dong2025rag} y la activación de bucles iterativos de búsqueda semántica (de hasta 7.0 intentos vectoriales en escenarios dudosos), este pipeline erradica por completo las alucinaciones de citas (0.0\% de alucinación en respuestas emitidas). Al priorizar la abstención de seguridad sobre la especulación, el sistema se abstiene de forma fidedigna en el 65.0\% de los casos complejos, garantizando que cada afirmación del reporte final cuente con respaldo probatorio absoluto.
+\end{itemize}
+
+\section{Contribuciones y alcance de los hallazgos}
+\label{sec:contribuciones_alcance}
+Las contribuciones de esta tesis se despliegan tanto en la frontera tecnológica de la inteligencia artificial como en la teoría aplicada de la gestión organizacional:
+
+\begin{enumerate}
+    \item \textbf{Aporte metodológico en Inteligencia Artificial y RAG Agéntico:} Se formula y valida de manera empírica un marco de evaluación sistemático e integral, alineado con las directrices de \cite{saadfalcon2024ares, ragas2024}, que va más allá de la evaluación superficial de texto al introducir métricas profundas como exactitud de citas, nivel de fundamentación contextual y resiliencia ante paráfrasis sintáctica. La implementación del pipeline adaptativo demuestra de forma práctica cómo los flujos de trabajo multi-agente \cite{autogen2024, langgraph2026} operando bajo dinámicas deliberativas de Sistema 2 \cite{liang2025reasoning} superan las limitaciones de la inferencia intuitiva de un solo paso.
+
+    \item \textbf{Mitigación del sesgo y objetividad en la evaluación de desempeño laboral:} En el campo de la gestión de personas y el desarrollo humano, este sistema de RAG Agéntico asume el rol de un auditor imparcial capaz de mitigar de forma automatizada las desviaciones sistemáticas inherentes a la evaluación humana subjetiva. Al basar los análisis en un motor determinista, se neutralizan sesgos ampliamente documentados por la literatura como el favoritismo de los evaluadores \cite{bauch2025accountability}, los problemas de calibración del desempeño \cite{bol2025calibration}, el sesgo de halo \cite{kim2025halos} y la percepción de inequidad de los procesos de evaluación corporativos \cite{tarigan2025appraisals, muhammada2025appraisalfairness}. La provisión de reportes de retroalimentación de desempeño automatizados y transparentes \cite{heine2025feedback} redefine las bases de los comités de calibración, transitando hacia la toma de decisiones basada exclusivamente en la evidencia probatoria real de la organización.
+\end{enumerate}
+
+\section{Recomendaciones y trabajos futuros}
+\label{sec:recomendaciones_futuro}
+Con base en las limitaciones metodológicas e interpretativas identificadas a lo largo de este estudio, se sugieren las siguientes avenidas de investigación futura:
+
+\begin{itemize}
+    \item \textbf{Optimización de la latencia en pipelines agénticos complejos:} El flujo recursivo e iterativo del Agentic Adaptive, si bien erradica las alucinaciones, eleva la latencia y el consumo computacional de llamadas al LLM. Se recomienda el desarrollo de técnicas de caché semántica adaptativa e hilos paralelos de búsqueda vectorial para mitigar la sobrecarga computacional de la recursión multi-paso en entornos empresariales de gran escala.
+
+    \item \textbf{Escalabilidad y extensibilidad multimodal:} Los hallazgos de esta tesis se centran en el análisis de un corpus estructurado en formato de texto plano y registros semiestructurados en el sector administrativo. Se propone como trabajo futuro expandir las capacidades del sistema hacia el paradigma del RAG Agéntico Multimodal (MMA-RAG) \cite{mmarag2025}, permitiendo al auditor automatizado integrar de forma segura evidencias procedentes de grabaciones de llamadas de desempeño, tableros gráficos de productividad y flujos heterogéneos de metadatos.
+
+    \item \textbf{Refinamiento del balance de abstención y unificación lógica:} Se sugiere investigar técnicas híbridas que logren flexibilizar la validación estricta de Prolog mediante unificaciones semánticas asistidas por LLMs (e.g., embeddings lógicos) para evitar la alta tasa de abstención de la lógica determinista pura, logrando el equilibrio ideal entre expresividad natural y veracidad analítica.
+\end{itemize}

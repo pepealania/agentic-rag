@@ -7,8 +7,8 @@ from experiments.domain_qa_helpers import (
 
 
 CASE_QUESTION_IDS = {
-    "direct_answer": ("QAUD-02", "QAUD-04", "QAUD-11"),
-    "analysis": ("QAUD-03", "QAUD-06", "QAUD-12"),
+    "direct_answer": ("QAUD-02", "QAUD-04", "QAUD-40"),
+    "analysis": ("QAUD-03", "QAUD-06", "QAUD-11"),
     "multihop": ("QAUD-01", "QAUD-05", "QAUD-07"),
 }
 
@@ -66,7 +66,7 @@ def test_paraphrases_are_question_specific_and_distinct():
     )
     assert "EMP-AUD-002" in paraphrases[0]
     assert "EMP-AUD-004" in paraphrases[1]
-    assert "EMP-AUD-011" in paraphrases[2]
+    assert "EMP-AUD-040" in paraphrases[2]
 
 
 def test_paraphrase_rejects_unknown_question():

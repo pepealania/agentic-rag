@@ -20,8 +20,8 @@ def load_jsonl(path: Path) -> list[dict]:
 
 def select_qa_questions(questions: list[dict]) -> list[dict]:
     case_question_ids = (
-        ("direct_answer", ("QAUD-02", "QAUD-04", "QAUD-11")),
-        ("analysis", ("QAUD-03", "QAUD-06", "QAUD-12")),
+        ("direct_answer", ("QAUD-02", "QAUD-04", "QAUD-40")),
+        ("analysis", ("QAUD-03", "QAUD-06", "QAUD-11")),
         ("multihop", ("QAUD-01", "QAUD-05", "QAUD-07")),
     )
     questions_by_id = {}
@@ -64,6 +64,10 @@ def paraphrase_question(question: dict) -> str:
             "¿Qué meses del segundo trimestre de 2026 quedan sin comprobar "
             "en el expediente de EMP-AUD-004?"
         ),
+        "QAUD-40": (
+            "Al revisar el expediente de EMP-AUD-040, ¿para cuántos objetivos "
+            "se encontró respaldo documental?"
+        ),
         "QAUD-11": (
             "El expediente de EMP-AUD-011 contiene varias versiones: "
             "¿cuál quedó aprobada y qué nota recibió?"
@@ -75,10 +79,6 @@ def paraphrase_question(question: dict) -> str:
         "QAUD-06": (
             "Al recalcular los indicadores de EMP-AUD-006, ¿qué promedio se "
             "obtiene y por qué difiere del 90% informado?"
-        ),
-        "QAUD-12": (
-            "¿Es válido comparar la evaluación de EMP-AUD-012 con las de otras "
-            "áreas, o faltan criterios comunes para hacerlo?"
         ),
         "QAUD-01": (
             "Para comprobar el desempeño de EMP-AUD-001 en 2026-S1, ¿cómo "
