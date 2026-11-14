@@ -70,3 +70,45 @@ def chunk_documents(
         )
 
     return chunks
+
+
+def chunk_document_by_words(
+    document: Document,
+    chunk_size: int,
+    chunk_overlap: int,
+) -> list[Chunk]:
+    """Split a document into overlapping word-based chunks."""
+
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be greater than zero.")
+
+    if chunk_overlap < 0:
+        raise ValueError("chunk_overlap must not be negative.")
+
+    if chunk_overlap >= chunk_size:
+        raise ValueError(
+            "chunk_overlap must be smaller than chunk_size."
+        )
+
+    words = document.text.split()
+    chunks: list[Chunk] = []
+    step = chunk_size - chunk_overlap
+
+    for chunk_index, start in enumerate(range(0, len(words), step)):
+        text = " ".join(words[start : start + chunk_size])
+        if not text:
+            continue
+
+        chunks.append(
+            Chunk(
+                chunk_id=(
+                    f"{document.document_id}_chunk_{chunk_index:04d}"
+                ),
+                document_id=document.document_id,
+                source=document.source,
+                text=text,
+                chunk_index=chunk_index,
+            )
+        )
+
+    return chunks

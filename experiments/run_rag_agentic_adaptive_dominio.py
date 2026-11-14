@@ -14,10 +14,11 @@ import yaml
 from agentic_rag.adaptive_coordinator import AdaptiveCoordinator
 from agentic_rag.adaptive_workflow import AdaptiveAgenticRAGWorkflow
 from agentic_rag.analyst import AnalystAgent
+from agentic_rag.chunking import chunk_document_by_words
 from agentic_rag.embeddings import EmbeddingModel
 from agentic_rag.evidence import EvidenceAgent
 from agentic_rag.retrieval import VectorStore
-from agentic_rag.schemas import Chunk, Question
+from agentic_rag.schemas import Chunk, Document, Question
 from agentic_rag.validation import AnswerValidator
 
 
@@ -49,14 +50,17 @@ def load_domain_config(path: Path | None = None) -> dict:
     return config
 
 
-def load_chunks(corpus_dir: Path) -> list[Chunk]:
+def load_chunks(
+    corpus_dir: Path,
+    chunk_size: int = 500,
+    chunk_overlap: int = 50,
+) -> list[Chunk]:
     chunks: list[Chunk] = []
     if not corpus_dir.is_dir():
         raise FileNotFoundError(f"Domain corpus directory does not exist: {corpus_dir}")
 
     for jsonl_path in sorted(corpus_dir.rglob("*.jsonl")):
         with jsonl_path.open("r", encoding="utf-8") as corpus_file:
-            document_chunk_index = 0
             for line_number, line in enumerate(corpus_file, start=1):
                 if not line.strip():
                     continue
@@ -75,16 +79,17 @@ def load_chunks(corpus_dir: Path) -> list[Chunk]:
                     or (metadata.get("source") if isinstance(metadata, dict) else "")
                     or jsonl_path
                 )
-                chunks.append(
-                    Chunk(
-                        chunk_id=f"{document_id}_chunk_{document_chunk_index:04d}",
-                        document_id=document_id,
-                        source=source,
-                        text=text,
-                        chunk_index=document_chunk_index,
+                chunks.extend(
+                    chunk_document_by_words(
+                        Document(
+                            document_id=document_id,
+                            source=source,
+                            text=str(text),
+                        ),
+                        chunk_size=chunk_size,
+                        chunk_overlap=chunk_overlap,
                     )
                 )
-                document_chunk_index += 1
 
     if not chunks:
         raise ValueError(f"No corpus chunks were loaded from: {corpus_dir}")
@@ -133,7 +138,14 @@ def main() -> None:
         embedding_config.get("name", "sentence-transformers/all-MiniLM-L6-v2")
     )
     vector_store = VectorStore(embedding_model)
-    vector_store.build(load_chunks(corpus_dir))
+    retrieval_config = config.get("retrieval", {})
+    vector_store.build(
+        load_chunks(
+            corpus_dir,
+            chunk_size=int(retrieval_config.get("chunk_size", 500)),
+            chunk_overlap=int(retrieval_config.get("chunk_overlap", 50)),
+        )
+    )
     evidence_agent = EvidenceAgent(
         vector_store=vector_store,
         top_k=int(config.get("retrieval", {}).get("top_k", 5)),

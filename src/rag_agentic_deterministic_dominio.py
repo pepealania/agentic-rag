@@ -8,13 +8,14 @@ import yaml
 from langgraph.graph import END, START, StateGraph
 
 from agentic_rag.analyst import AnalystAgent
+from agentic_rag.chunking import chunk_document_by_words
 from agentic_rag.embeddings import EmbeddingModel
 from agentic_rag.evidence import EvidenceAgent
 from agentic_rag.retrieval import VectorStore
 from agentic_rag.deterministic_workflow_prolog_rules import (
     DeterministicWorkflowPrologRules,
 )
-from agentic_rag.schemas import Chunk, Question, RetrievedChunk
+from agentic_rag.schemas import Chunk, Document, Question, RetrievedChunk
 from agentic_rag.state import AgentState
 from agentic_rag.validation import AnswerValidator
 
@@ -94,7 +95,11 @@ class DeterministicDomainAgenticRAGWorkflow:
         )
         vector_store = VectorStore(embedding_model)
 
-        chunks = self._load_corpus_chunks()
+        retrieval_config = self.config.get("retrieval", {})
+        chunks = self._load_corpus_chunks(
+            chunk_size=int(retrieval_config.get("chunk_size", 500)),
+            chunk_overlap=int(retrieval_config.get("chunk_overlap", 50)),
+        )
         vector_store.build(chunks)
         return vector_store
 
@@ -128,25 +133,28 @@ class DeterministicDomainAgenticRAGWorkflow:
 
         return documents
 
-    def _load_corpus_chunks(self) -> list[Chunk]:
+    def _load_corpus_chunks(
+        self,
+        chunk_size: int,
+        chunk_overlap: int,
+    ) -> list[Chunk]:
         chunks: list[Chunk] = []
         for document in self.corpus_documents:
             text = document.get("content") or document.get("text") or ""
             if not text:
                 continue
 
-            document_id = str(document.get("document_id", "document"))
-            source = str(document.get("source", ""))
-            chunk_id = f"{document_id}_chunk_{len(chunks):04d}"
-            chunks.append(
-                        Chunk(
-                            chunk_id=chunk_id,
-                            document_id=document_id,
-                            source=source,
-                            text=text,
-                            chunk_index=len(chunks),
-                        )
-                    )
+            chunks.extend(
+                chunk_document_by_words(
+                    Document(
+                        document_id=str(document.get("document_id", "document")),
+                        source=str(document.get("source", "")),
+                        text=str(text),
+                    ),
+                    chunk_size=chunk_size,
+                    chunk_overlap=chunk_overlap,
+                )
+            )
 
         if not chunks:
             raise ValueError("No corpus chunks were loaded from the domain corpus.")

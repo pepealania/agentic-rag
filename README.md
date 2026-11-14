@@ -262,29 +262,25 @@ All three runners use dense retrieval: the configured
 chunks and the query into dense vectors, then FAISS finds the most similar
 vectors and returns their associated chunks. This is the retrieval stage, not
 the analysis stage; the retrieved evidence is passed to the answer-generation
-or analyst component. Their chunking and retrieval implementations are not
-fully controlled to be identical:
+or analyst component. All three domain runners now use the same word-based
+chunking settings (`retrieval.chunk_size` and `retrieval.chunk_overlap`, 500
+words and 50 words by default in `default_desempeno.yaml`):
 
 - The baseline (`run_rag_baseline_dominio.py`) splits each document's content
-  into word-based chunks using `retrieval.chunk_size` and
-  `retrieval.chunk_overlap` (500 words and 50 words in
-  `default_desempeno.yaml`), then embeds and retrieves those chunks in
-  `src/rag_baseline.py`.
+  into overlapping word-based chunks in `src/rag_baseline.py`.
 - The deterministic runner (`run_rag_agentic_deterministic_dominio.py`) and
-  adaptive runner (`run_rag_agentic_adaptive_dominio.py`) use the shared
-  `src/agentic_rag/embeddings.py` and `src/agentic_rag/retrieval.py`
-  components. In these domain runners, each non-empty JSONL corpus record is
-  treated as one chunk; they do not apply the baseline's word-based splitter.
+  adaptive runners (`run_rag_agentic_adaptive_dominio.py` and its QA variant)
+  use the shared word-based splitter in `src/agentic_rag/chunking.py`, then
+  embed and retrieve the resulting chunks with the shared agentic retrieval
+  components.
 - The deterministic workflow additionally evaluates Prolog audit rules and
   supplies their findings as evidence. The adaptive workflow may perform
   additional retrieval or analysis attempts according to its coordinator.
 
-Consequently, embedding and retrieval are common stages in the broad
-experimental design, but chunk boundaries, indexed content, and workflow
-behavior differ. Comparisons across these runners should not be described as
-isolating only the effect of deterministic versus adaptive control. A more
-controlled comparison should first align chunking and confirm that the same
-corpus, embedding model, `top_k`, and retrieved evidence are used.
+The segmentation strategy is therefore aligned across the three architectures.
+Their workflow behavior still differs, and adaptive retries may issue further
+retrievals; comparisons should keep the corpus, embedding model, and `top_k`
+consistent when evaluating those workflow differences.
 
 ### Audit-rule prototype
 
