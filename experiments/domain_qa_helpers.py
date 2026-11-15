@@ -22,7 +22,7 @@ def select_qa_questions(questions: list[dict]) -> list[dict]:
     case_question_ids = (
         ("direct_answer", ("QAUD-02", "QAUD-04", "QAUD-40")),
         ("analysis", ("QAUD-03", "QAUD-06", "QAUD-11")),
-        ("multihop", ("QAUD-01", "QAUD-05", "QAUD-07")),
+        ("multihop", ("QAUD-01", "QAUD-05", "QAUD-08")),
     )
     questions_by_id = {}
     for question in questions:
@@ -88,9 +88,9 @@ def paraphrase_question(question: dict) -> str:
             "¿Qué información habría que recuperar para reconstruir quién "
             "evaluó a EMP-AUD-005 y con qué criterios se respaldó la nota?"
         ),
-        "QAUD-07": (
-            "¿Qué problemas de privacidad y de permisos de acceso encontró "
-            "la auditoría en el expediente de EMP-AUD-007?"
+        "QAUD-08": (
+            "¿De cuánto a cuánto cambió la calificación de EMP-AUD-008 y qué "
+            "información falta para rastrear ese cambio?"
         ),
     }
     question_id = question.get("question_id")

@@ -9,7 +9,7 @@ from experiments.domain_qa_helpers import (
 CASE_QUESTION_IDS = {
     "direct_answer": ("QAUD-02", "QAUD-04", "QAUD-40"),
     "analysis": ("QAUD-03", "QAUD-06", "QAUD-11"),
-    "multihop": ("QAUD-01", "QAUD-05", "QAUD-07"),
+    "multihop": ("QAUD-01", "QAUD-05", "QAUD-08"),
 }
 
 
@@ -45,10 +45,10 @@ def test_requires_all_curated_questions():
     questions = [
         question
         for question in _questions()
-        if question["question_id"] != "QAUD-07"
+        if question["question_id"] != "QAUD-08"
     ]
 
-    with pytest.raises(ValueError, match="QAUD-07"):
+    with pytest.raises(ValueError, match="QAUD-08"):
         select_qa_questions(questions)
 
 
